@@ -1,3 +1,33 @@
-html, body, #root {
-    height: 100%;
+html,
+body,
+#root {
+  height: 100%;
+}
+
+:root {
+  --main-title-color: #1a1a1a;
+  --generic-text-color: #333333;
+  --support-text-color: #cccccc;
+  --background-highlight-color: #f5f5f5;
+  --foreground-container-color: #ffffff;
+  --box-shadow-color: #cccccc;
+  --blue: #2596be;
+}
+
+& .MuiTypography-root {
+  margin: "1px";
+}
+
+.search-input::placeholder {
+  color: #000;
+}
+
+/* SAFARI ONLY */
+@supports (hanging-punctuation: first) and (font: -apple-system-body) and
+  (-webkit-appearance: none) {
+  /* FIX per overflow del labe con input stondato */
+  .MuiInputLabel-shrink {
+    margin-left: 1px;
+    background-color: var(--foreground-container-color);
+  }
 }
