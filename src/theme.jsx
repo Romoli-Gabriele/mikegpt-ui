@@ -39,6 +39,7 @@ const theme = responsiveFontSizes(
       shadows: {
         0: "none",
         1: "0px 1px 2px rgba(0, 0, 0, 0.03)",
+        8: "0px 2px 4px rgba(0, 0, 0, 0.03)",
       },
     },
     itIT

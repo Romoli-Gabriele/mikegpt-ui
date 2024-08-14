@@ -75,9 +75,8 @@ export const InputBar = React.forwardRef(
     const onSelectedTool = (tool) => () => {
       setSelectedTool(tool);
       handleToolsPopupClose();
-      if (tool.isForm) {
+      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0)
         setIsExtended(true);
-      }
     };
 
     const closeExtended = () => {
@@ -95,10 +94,11 @@ export const InputBar = React.forwardRef(
       },
     }));
 
-    const renderExtendedInput = (name) => {
+    const renderExtendedInput = (kwargItem) => {
+      console.log({ kwargItem, kwargs });
       return (
         <Stack
-          key={name}
+          key={kwargItem.name}
           direction="row"
           spacing={1}
           alignItems="center"
@@ -108,7 +108,9 @@ export const InputBar = React.forwardRef(
           }}
         >
           <div style={{ marginRight: "0.3rem", width: "6rem" }}>
-            <Typography variant="subtitle2">{name}:</Typography>
+            <Typography variant="subtitle2">
+              {kwargItem.placeholder}:
+            </Typography>
           </div>
           <InputBase
             sx={{
@@ -118,19 +120,22 @@ export const InputBar = React.forwardRef(
               pl: 2,
               borderRadius: "17px",
               width: "100%",
+              backgroundColor: "red",
             }}
             inputProps={{ p: 1 }}
-            value={kwargs[name]}
-            onChange={(e) => setKwargs({ ...kwargs, [name]: e.target.value })}
+            value={kwargs[kwargItem.name]}
+            onChange={(e) =>
+              setKwargs({ ...kwargs, [kwargItem.name]: e.target.value })
+            }
           />
         </Stack>
       );
     };
 
-    const renderExtendedForm = () => {
+    const renderExtendedForm = (formKwargs = []) => {
       return (
         <Stack direction="column" spacing={1} sx={{ flex: 1, p: "2rem 3rem" }}>
-          {["Name", "Surname"].map((x) => {
+          {formKwargs.map((x) => {
             return renderExtendedInput(x);
           })}
         </Stack>
@@ -191,12 +196,13 @@ export const InputBar = React.forwardRef(
             </Typography>
           )}
 
-          {isExtended ? (
-            renderExtendedForm()
+          {isExtended &&
+          selectedTool.kwargs &&
+          selectedTool.kwargs.length > 0 ? (
+            renderExtendedForm(selectedTool.kwargs)
           ) : (
             <>
               <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-
               <InputBase
                 sx={{
                   ml: 1,

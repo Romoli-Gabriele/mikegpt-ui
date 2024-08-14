@@ -82,11 +82,10 @@ const ChatPage = () => {
   const [debugAB, setDebugAB] = useState("A");
   const inputBarRef = useRef(null);
 
-  console.log({ messages }); // TODO REMOVE
-
   // Rimuove dal messaggio l'header del markdown ```markdown
   // Se no React-Markdown non riesce a formattare correttamente
   const fromatMessage = (message) => {
+    if (!message) return "";
     let newMessage = message.replaceAll("```markdown", "");
     newMessage = newMessage.replaceAll("```", "");
     return newMessage;

@@ -11,7 +11,19 @@
     "name": "nameSurname",
     "subTitle": "concatenate name and surname",
     "isForm": true,
-    "endpoint": "nameSurname"
+    "endpoint": "nameSurname",
+    "kwargs": [
+      {
+        "name": "name",
+        "type": "text",
+        "placeholder": "Name"
+      },
+      {
+        "name": "surname",
+        "type": "text",
+        "placeholder": "Surname"
+      }
+    ]
   },
   null,
   null,
