@@ -1,0 +1,21 @@
+[
+  {
+    "ID": 0,
+    "name": "toCapital",
+    "subTitle": "transform a text to capital",
+    "isForm": false,
+    "endpoint": "toCapital"
+  },
+  {
+    "ID": 1,
+    "name": "nameSurname",
+    "subTitle": "concatenate name and surname",
+    "isForm": true,
+    "endpoint": "nameSurname"
+  },
+  null,
+  null,
+  null,
+  null,
+  null
+]
