@@ -77,6 +77,7 @@ export const InputBar = React.forwardRef(
       handleToolsPopupClose();
       if (tool.isForm && tool.kwargs && tool.kwargs.length > 0)
         setIsExtended(true);
+      else if (isExtended) setIsExtended(false);
     };
 
     const closeExtended = () => {
@@ -88,10 +89,15 @@ export const InputBar = React.forwardRef(
     useImperativeHandle(ref, () => ({
       submit: submit,
       clear: clear,
-      edit: (id, val, kwargs) => {
+      edit: (id, val, kwargs, tool) => {
         setValue(val);
         setKwargs(kwargs);
         setMessageId(id);
+        if (tool) setSelectedTool(tool);
+      },
+      setTool(tool, kwargs = {}) {
+        onSelectedTool(tool)();
+        setKwargs(kwargs);
       },
     }));
 

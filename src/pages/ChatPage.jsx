@@ -186,7 +186,11 @@ const ChatPage = () => {
     if (messages.length === 0)
       return (
         <Box sx={{ flexGrow: 1, ...CONTENT_PADDING }}>
-          <EmptyChatView />
+          <EmptyChatView
+            onToolPress={(tool) => {
+              inputBarRef.current?.setTool(tool, {});
+            }}
+          />
         </Box>
       );
 
