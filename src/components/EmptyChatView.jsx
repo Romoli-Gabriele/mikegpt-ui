@@ -6,21 +6,20 @@ import styled from "@emotion/styled";
 import ElectricBolt from "@mui/icons-material/Bolt";
 import TOOLS from "../services/TOOLS.json";
 import { NoMarginTypography } from "./utils";
-
-const GRID_SPACING_ROW = "2rem";
-const GRID_SPACING_COL = "8rem";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const SuggestionCard = styled(Paper)(({ theme }) => ({
-  padding: "2rem",
+  padding: "3rem",
   borderRadius: theme.shape.borderRadius,
   boxShadow: theme.shadows[1],
   height: "100%",
   minHeight: "8rem",
+  marginBottom: "2rem",
   "&:hover": {
     cursor: "pointer",
     boxShadow: theme.shadows[3],
     backgroundColor: theme.palette.action.hover,
-  },
+  }
 }));
 
 export const EmptyChatView = () => {
@@ -32,9 +31,25 @@ export const EmptyChatView = () => {
     return items;
   }, []);
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  //const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
+
+  const GRID_SPACING_ROW = isSmallScreen
+      ? "1rem"
+      : isMediumScreen
+          ? "1.5rem"
+          : "2rem";
+  const GRID_SPACING_COL = isSmallScreen
+      ? "4rem"
+      : isMediumScreen
+          ? "6rem"
+          : "8rem";
+
   const renderSuggestionCard = (item, index) => {
     return (
-      <Grid item xs={12} sm={6} md={4} key={index}>
+      <Grid item xs={12} sm={8} md={5} key={index}>
         <SuggestionCard>
           {item ? (
             <Stack>
@@ -60,7 +75,9 @@ export const EmptyChatView = () => {
   };
 
   return (
+      //add margin bottom to the stack
     <Stack
+      marginBottom={"5rem"}
       direction={"column"}
       justifyContent={"space-around"}
       spacing={2}
@@ -116,5 +133,6 @@ export const EmptyChatView = () => {
         </Grid>
       </div>
     </Stack>
+
   );
 };
