@@ -82,6 +82,7 @@ export const InputBar = React.forwardRef(
     const closeExtended = () => {
       setIsExtended(false);
       setSelectedTool(null);
+      clear();
     };
 
     useImperativeHandle(ref, () => ({
@@ -95,7 +96,6 @@ export const InputBar = React.forwardRef(
     }));
 
     const renderExtendedInput = (kwargItem) => {
-      console.log({ kwargItem, kwargs });
       return (
         <Stack
           key={kwargItem.name}
@@ -114,13 +114,11 @@ export const InputBar = React.forwardRef(
           </div>
           <InputBase
             sx={{
-              background: "red",
               background: "var(--background-highlight-color)",
               p: 0.3,
               pl: 2,
               borderRadius: "17px",
               width: "100%",
-              backgroundColor: "red",
             }}
             inputProps={{ p: 1 }}
             value={kwargs[kwargItem.name]}
