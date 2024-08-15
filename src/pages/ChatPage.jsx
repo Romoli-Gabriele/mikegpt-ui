@@ -126,23 +126,33 @@ const ChatPage = () => {
     setLoading(false);
   };
 
-  const sendMessage = async (question, kwargs) => {
+  const sendMessage = async (
+    question = "",
+    kwargs = undefined,
+    toolId = undefined,
+    messageId = undefined
+  ) => {
     setLoading(true);
     try {
       let conversation_id = conversationId;
       if (!conversation_id) {
         conversation_id = await createConversation();
       }
+
       console.log("conversation_id", conversation_id);
-      let _messages = [
-        ...messages,
-        {
-          data: {
-            content: question,
-          },
-          type: "human",
+
+      const sentMessage = {
+        data: {
+          content: question,
+          kwargs: kwargs,
+          toolId: toolId,
         },
-      ];
+        type: "human",
+      };
+
+      console.log("sentMessage", sentMessage);
+
+      let _messages = [...messages, sentMessage];
       setMessages([
         ..._messages,
         {
@@ -156,20 +166,22 @@ const ChatPage = () => {
         const res = await ConversationService.sendMessage(
           conversation_id,
           question,
+          kwargs && Object.keys(kwargs).length > 0 ? kwargs : undefined,
           import.meta.env.VITE_DEBUG_SELECT === "true" ? debugAB : null
         );
 
-        setMessages([
-          ..._messages,
-          {
-            data: {
-              content: res.data["response"],
-              documents: res.data["documents"],
-              runid: res.data["runid"],
-            },
-            type: "ai",
+        const responseMessage = {
+          data: {
+            content: res.data["response"],
+            documents: res.data["documents"],
+            runid: res.data["runid"],
           },
-        ]);
+          type: "ai",
+        };
+
+        console.log("responseMessage", responseMessage);
+
+        setMessages([..._messages, responseMessage]);
       } catch (e) {
         // skip
         // delete last message
@@ -263,7 +275,8 @@ const ChatPage = () => {
                           inputBarRef.current?.edit(
                             message.data.runid,
                             message.data.content || "",
-                            {} // TODO: add attachments
+                            message.data.kwargs || {},
+                            message.data.toolId || undefined
                           );
                         }}
                         size="small"

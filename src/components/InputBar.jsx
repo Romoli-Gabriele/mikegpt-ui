@@ -33,7 +33,10 @@ const PopupBody = styled("div")(({ theme }) => {
 });
 
 export const InputBar = React.forwardRef(
-  ({ onSubmit = (value, kwargs, messageId) => {}, loading = false }, ref) => {
+  (
+    { onSubmit = (value, kwargs, toolId, messageId) => {}, loading = false },
+    ref
+  ) => {
     const theme = useTheme();
     const [toolsAnchor, setToolsAnchor] = useState(null);
     const [selectedTool, setSelectedTool] = useState(null);
@@ -55,11 +58,18 @@ export const InputBar = React.forwardRef(
       setValue("");
       setKwargs({});
       setMessageId(null);
+      if (isExtended) setIsExtended(false);
+      setSelectedTool(null);
     };
 
     const submit = () => {
       if (!canSubmit) return;
-      onSubmit(value, kwargs, messageId);
+      onSubmit(
+        value,
+        kwargs,
+        selectedTool?.ID || undefined,
+        messageId || undefined
+      );
       clear();
     };
 
@@ -75,9 +85,11 @@ export const InputBar = React.forwardRef(
     const onSelectedTool = (tool) => () => {
       setSelectedTool(tool);
       handleToolsPopupClose();
-      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0)
+      console.log("TOOL SELECTED:", tool);
+      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0) {
         setIsExtended(true);
-      else if (isExtended) setIsExtended(false);
+        console.log("EXTENDED FORM OPENED");
+      } else if (isExtended) setIsExtended(false);
     };
 
     const closeExtended = () => {
@@ -89,11 +101,16 @@ export const InputBar = React.forwardRef(
     useImperativeHandle(ref, () => ({
       submit: submit,
       clear: clear,
-      edit: (id, val, kwargs, tool) => {
+      edit: (id, val, kwargs, toolId) => {
+        console.log("EDIT MESSAGE CALLED WITH PROPS:", id, val, kwargs, toolId);
+        clear();
         setValue(val);
         setKwargs(kwargs);
         setMessageId(id);
-        if (tool) setSelectedTool(tool);
+        if (toolId) {
+          const foundTool = TOOLS.find((x) => x.ID === toolId);
+          if (foundTool) onSelectedTool(foundTool)();
+        }
       },
       setTool(tool, kwargs = {}) {
         onSelectedTool(tool)();
