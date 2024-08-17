@@ -33,7 +33,10 @@ const PopupBody = styled("div")(({ theme }) => {
 });
 
 export const InputBar = React.forwardRef(
-  ({ onSubmit = (value, kwargs, messageId) => {}, loading = false }, ref) => {
+  (
+    { onSubmit = (value, kwargs, toolId, messageId) => {}, loading = false },
+    ref
+  ) => {
     const theme = useTheme();
     const [toolsAnchor, setToolsAnchor] = useState(null);
     const [selectedTool, setSelectedTool] = useState(null);
@@ -55,11 +58,18 @@ export const InputBar = React.forwardRef(
       setValue("");
       setKwargs({});
       setMessageId(null);
+      if (isExtended) setIsExtended(false);
+      setSelectedTool(null);
     };
 
     const submit = () => {
       if (!canSubmit) return;
-      onSubmit(value, kwargs, messageId);
+      onSubmit(
+        value,
+        kwargs,
+        selectedTool?.ID || undefined,
+        messageId || undefined
+      );
       clear();
     };
 
@@ -75,27 +85,40 @@ export const InputBar = React.forwardRef(
     const onSelectedTool = (tool) => () => {
       setSelectedTool(tool);
       handleToolsPopupClose();
-      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0)
+      console.log("TOOL SELECTED:", tool);
+      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0) {
         setIsExtended(true);
+        console.log("EXTENDED FORM OPENED");
+      } else if (isExtended) setIsExtended(false);
     };
 
     const closeExtended = () => {
       setIsExtended(false);
       setSelectedTool(null);
+      clear();
     };
 
     useImperativeHandle(ref, () => ({
       submit: submit,
       clear: clear,
-      edit: (id, val, kwargs) => {
+      edit: (id, val, kwargs, toolId) => {
+        console.log("EDIT MESSAGE CALLED WITH PROPS:", id, val, kwargs, toolId);
+        clear();
         setValue(val);
         setKwargs(kwargs);
         setMessageId(id);
+        if (toolId) {
+          const foundTool = TOOLS.find((x) => x.ID === toolId);
+          if (foundTool) onSelectedTool(foundTool)();
+        }
+      },
+      setTool(tool, kwargs = {}) {
+        onSelectedTool(tool)();
+        setKwargs(kwargs);
       },
     }));
 
     const renderExtendedInput = (kwargItem) => {
-      console.log({ kwargItem, kwargs });
       return (
         <Stack
           key={kwargItem.name}
@@ -114,13 +137,11 @@ export const InputBar = React.forwardRef(
           </div>
           <InputBase
             sx={{
-              background: "red",
               background: "var(--background-highlight-color)",
               p: 0.3,
               pl: 2,
               borderRadius: "17px",
               width: "100%",
-              backgroundColor: "red",
             }}
             inputProps={{ p: 1 }}
             value={kwargs[kwargItem.name]}

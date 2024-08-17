@@ -19,10 +19,10 @@ const SuggestionCard = styled(Paper)(({ theme }) => ({
     cursor: "pointer",
     boxShadow: theme.shadows[3],
     backgroundColor: theme.palette.action.hover,
-  }
+  },
 }));
 
-export const EmptyChatView = () => {
+export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
   const { user } = useAuth();
 
   const suggestedItems = React.useMemo(() => {
@@ -37,20 +37,20 @@ export const EmptyChatView = () => {
   //const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   const GRID_SPACING_ROW = isSmallScreen
-      ? "1rem"
-      : isMediumScreen
-          ? "1.5rem"
-          : "2rem";
+    ? "1rem"
+    : isMediumScreen
+    ? "1.5rem"
+    : "2rem";
   const GRID_SPACING_COL = isSmallScreen
-      ? "4rem"
-      : isMediumScreen
-          ? "6rem"
-          : "8rem";
+    ? "4rem"
+    : isMediumScreen
+    ? "6rem"
+    : "8rem";
 
   const renderSuggestionCard = (item, index) => {
     return (
       <Grid item xs={12} sm={8} md={5} key={index}>
-        <SuggestionCard>
+        <SuggestionCard onClick={() => onToolPress(item)}>
           {item ? (
             <Stack>
               <Typography variant="h7" fontWeight={"bold"}>
@@ -75,7 +75,7 @@ export const EmptyChatView = () => {
   };
 
   return (
-      //add margin bottom to the stack
+    //add margin bottom to the stack
     <Stack
       marginBottom={"5rem"}
       direction={"column"}
@@ -133,6 +133,5 @@ export const EmptyChatView = () => {
         </Grid>
       </div>
     </Stack>
-
   );
 };
