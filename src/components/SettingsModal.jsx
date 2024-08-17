@@ -2,36 +2,21 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { Divider, IconButton } from "@mui/material";
+import { Divider } from "@mui/material";
 import {
-  SettingsOutlined,
   ModeEdit,
   Delete,
   CancelOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import { PoliciesLinks } from "./Footer";
+import PropTypes from "prop-types";
 
-export const SettingsModal = () => {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
+export const SettingsModal = ({ open, setOpen }) => {
+  console.log(open);
   const handleClose = () => setOpen(false);
-
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <IconButton
-        onClick={handleOpen}
-        sx={{
-          backgroundColor: "var(--support-background-color)",
-          color: "var(--support-text-color)",
-          width: "2rem",
-          height: "2rem",
-          borderRadius: "50%",
-          alignSelf: "center",
-        }}
-      >
-        <SettingsOutlined fontSize="small" />
-      </IconButton>
       <Modal
         open={open}
         onClose={handleClose}
@@ -75,4 +60,10 @@ export const SettingsModal = () => {
       </Modal>
     </div>
   );
+};
+
+
+SettingsModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
 };
