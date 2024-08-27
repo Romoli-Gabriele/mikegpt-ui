@@ -23,7 +23,7 @@ export const ExtendedFooter = () => {
 
 export const MinimizedFooter = () => {
   return (
-    <Box sx={{ width: "100%", mb: 1, pt: 5}}>
+    <Box sx={{ width: "100%", pt: 10}}>
       <FooterCaption />
     </Box>
   );

@@ -28,6 +28,9 @@ import { MinimizedFooter } from "../components/Footer.jsx";
 import Markdown from "react-markdown";
 import dedent from "dedent";
 import { useStoreActions, useStoreState } from "easy-peasy";
+import { useMediaQuery } from "@mui/material";
+
+
 
 const CONTENT_PADDING = {
   paddingLeft: "3rem",
@@ -56,6 +59,10 @@ const ChatPage = () => {
     newMessage = newMessage.replaceAll("```", "");
     return newMessage;
   };
+
+  // Controlla se l'utente è su mobile
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
 
   useEffect(() => {
     ConversationService.sendMessage("", "").then();
@@ -382,10 +389,9 @@ const ChatPage = () => {
               loading={loading}
             />
           </Box>
-
-          <MinimizedFooter />
         </Stack>
       </Stack>
+      {!isMobile && <MinimizedFooter />}
     </Container>
   );
 };
