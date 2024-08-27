@@ -373,7 +373,7 @@ const ChatPage = () => {
               left: "20%",
               width: "60%",
               zIndex: 1000,
-              padding: theme.spacing(2), // Optional: to add some padding
+              padding: theme.spacing(3), // Optional: to add some padding
             }}
           >
             <InputBar
