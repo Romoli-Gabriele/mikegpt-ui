@@ -33,43 +33,6 @@ const CONTENT_PADDING = {
   paddingRight: "3rem",
 };
 
-// const markdownContent = `
-// # Termini di Servizio
-//
-// ## 1. Introduzione
-// Benvenuti nell'app [Nome dell'App]. Questi Termini di Servizio ("ToS") regolano l'uso della nostra applicazione. Utilizzando l'app, accetti di essere vincolato da questi termini.
-//
-// ## 2. Accettazione dei Termini
-// Utilizzando l'app, accetti i presenti ToS. Se non accetti questi termini, non utilizzare l'app.
-//
-// ## 3. Modifiche ai Termini
-// Ci riserviamo il diritto di modificare questi ToS in qualsiasi momento. Le modifiche saranno comunicate tramite [modalità di notifica].
-//
-// ## 4. Uso dell'App
-// L'utente si impegna a utilizzare l'app in conformità con tutte le leggi applicabili e a non utilizzare l'app per scopi illeciti.
-//
-// ## 5. Account Utente
-// Per utilizzare alcune funzionalità dell'app, potrebbe essere necessario creare un account. L'utente è responsabile della sicurezza del proprio account.
-//
-// ## 6. Contenuti Generati dagli Utenti
-// Gli utenti possono pubblicare contenuti sull'app. Pubblicando contenuti, l'utente concede all'azienda una licenza non esclusiva per utilizzare tali contenuti.
-//
-// ## 7. Proprietà Intellettuale
-// Tutti i contenuti dell'app sono di proprietà dell'azienda o dei suoi licenziatari e sono protetti dalle leggi sul copyright.
-//
-// ## 8. Limitazione di Responsabilità
-// L'azienda non sarà responsabile per eventuali danni derivanti dall'uso dell'app.
-//
-// ## 9. Privacy
-// Per informazioni su come trattiamo i dati personali degli utenti, consultare la nostra [Politica sulla Privacy].
-//
-// ## 10. Legge Applicabile e Foro Competente
-// Questi ToS sono regolati dalla legge [indicare la giurisdizione]. Qualsiasi controversia sarà risolta presso il foro competente di [indicare il foro].
-//
-// ## 11. Contatti
-// Per domande o problemi relativi a questi ToS, contattaci a [indirizzo email].
-// `;
-
 const ChatPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -404,20 +367,20 @@ const ChatPage = () => {
           )}
 
           <Box
-              sx={{
-                position: "fixed",
-                bottom: 0,
-                right: "20%",
-                left: "20%",
-                width: "60%",
-                zIndex: 1000,
-                padding: theme.spacing(2), // Optional: to add some padding
-              }}
+            sx={{
+              position: "fixed",
+              bottom: 0,
+              right: "20%",
+              left: "20%",
+              width: "60%",
+              zIndex: 1000,
+              padding: theme.spacing(2), // Optional: to add some padding
+            }}
           >
             <InputBar
-                onSubmit={sendMessage}
-                ref={inputBarRef}
-                loading={loading}
+              onSubmit={sendMessage}
+              ref={inputBarRef}
+              loading={loading}
             />
           </Box>
 
