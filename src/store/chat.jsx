@@ -12,4 +12,9 @@ export const chatModel = {
   setConversationId: action((state, payload) => {
     state.conversationId = payload;
   }),
+
+  loading: false,
+  setLoading: action((state, payload) => {
+    state.loading = payload;
+  }),
 };

@@ -1,3 +1,4 @@
+import { store } from "../store/index.jsx";
 import { lambdaClient, apiClient } from "./ApiService.jsx";
 
 const addConversation = async () => {
@@ -43,6 +44,14 @@ const processFile = async (file_name, file_title, file_date) => {
   });
 };
 
+const createNewConversation = () => {
+  if (store.getState().chat.messages?.length > 0) {
+    store.getActions().chat.setMessages([]);
+    store.getActions().chat.setConversationId(null);
+    store.getActions().chat.setLoading(false); // potrebbe essere in corso un caricamentonella vecchia conversazione
+  }
+};
+
 export const ConversationService = {
   addConversation,
   getConversation,
@@ -50,4 +59,5 @@ export const ConversationService = {
   sendFeedback,
   getFileUploadUrl,
   processFile,
+  createNewConversation,
 };

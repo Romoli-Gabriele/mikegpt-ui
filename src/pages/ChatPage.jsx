@@ -27,6 +27,7 @@ import { SourcesModal } from "../components/SourcesModal.jsx";
 import { MinimizedFooter } from "../components/Footer.jsx";
 import Markdown from "react-markdown";
 import dedent from "dedent";
+import { useStoreActions, useStoreState } from "easy-peasy";
 
 const CONTENT_PADDING = {
   paddingLeft: "3rem",
@@ -35,11 +36,15 @@ const CONTENT_PADDING = {
 
 const ChatPage = () => {
   const { enqueueSnackbar } = useSnackbar();
-
   const theme = useTheme();
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState();
+  const messages = useStoreState((state) => state.chat.messages);
+  const setMessages = useStoreActions((actions) => actions.chat.setMessages);
+  const conversationId = useStoreState((state) => state.chat.conversationId);
+  const setConversationId = useStoreActions(
+    (actions) => actions.chat.setConversationId
+  );
+  const loading = useStoreState((state) => state.chat.loading);
+  const setLoading = useStoreActions((actions) => actions.chat.setLoading);
   const [debugAB, setDebugAB] = useState("A");
   const inputBarRef = useRef(null);
 
@@ -55,11 +60,6 @@ const ChatPage = () => {
   useEffect(() => {
     ConversationService.sendMessage("", "").then();
   }, [conversationId]);
-
-  const handleNewConversation = async () => {
-    setMessages([]);
-    setConversationId(null);
-  };
 
   const createConversation = async () => {
     setLoading(true);
@@ -95,12 +95,10 @@ const ChatPage = () => {
   ) => {
     setLoading(true);
     try {
-      let conversation_id = conversationId;
-      if (!conversation_id) {
-        conversation_id = await createConversation();
+      let current_conversation_id = conversationId;
+      if (!current_conversation_id) {
+        current_conversation_id = await createConversation();
       }
-
-      console.log("conversation_id", conversation_id);
 
       const sentMessage = {
         data: {
@@ -110,8 +108,6 @@ const ChatPage = () => {
         },
         type: "human",
       };
-
-      console.log("sentMessage", sentMessage);
 
       let _messages = [...messages, sentMessage];
       setMessages([
@@ -125,29 +121,32 @@ const ChatPage = () => {
 
       try {
         const res = await ConversationService.sendMessage(
-          conversation_id,
+          current_conversation_id,
           question,
           kwargs && Object.keys(kwargs).length > 0 ? kwargs : undefined,
           import.meta.env.VITE_DEBUG_SELECT === "true" ? debugAB : null
         );
 
-        const responseMessage = {
-          data: {
-            content: res.data["response"],
-            documents: res.data["documents"],
-            runid: res.data["runid"],
-          },
-          type: "ai",
-        };
+        // Controlla se l'utente è ancora nella chat che ha inviato il messaggio e questa non è cambiata
+        // Se no c'è il bug che se invio un messaggio e subito dopo prima della risposta  cambio chat
+        // La risposta arriva nella chat sbagliata e si porta tutti i vecchi messaggi
+        if (current_conversation_id == conversationId) {
+          const responseMessage = {
+            data: {
+              content: res.data["response"],
+              documents: res.data["documents"],
+              runid: res.data["runid"],
+            },
+            type: "ai",
+          };
 
-        console.log("responseMessage", responseMessage);
-        setMessages([..._messages, responseMessage]);
+          setMessages([..._messages, responseMessage]);
+        }
       } catch (e) {
         // skip
         // delete last message
         setMessages(_messages.slice(0, -1));
       }
-      // await getConversation();
     } catch (e) {
       console.log(e);
     }
