@@ -82,7 +82,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
       direction={"column"}
       justifyContent={"space-around"}
       spacing={1}
-      sx={{ width: "100%", maxHeight: "110%",  overflowY: "auto", padding: "1rem" }}
+      sx={{ width: "100%", maxHeight: "100%",  overflowY: "auto", padding: "1rem" }}
     >
       <div>
         <NoMarginTypography variant={"h5"} fontWeight="bold">

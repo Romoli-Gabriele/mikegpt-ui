@@ -382,9 +382,9 @@ const ChatPage = () => {
             sx={{
               position: "fixed",
               bottom: 0,
-              right: "20%",
-              left: "20%",
-              width: "60%",
+              right: isSm ? "10%" : "20%",
+              left: isSm ? "10%" : "20%",
+              width: isSm ? "80%" : "60%",
               zIndex: 1000,
               padding: theme.spacing(3), // Optional: to add some padding
             }}
