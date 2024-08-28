@@ -155,7 +155,7 @@ export const InputBar = React.forwardRef(
 
     const renderExtendedForm = (formKwargs = []) => {
       return (
-        <Stack direction="column" spacing={1} sx={{ flex: 1, p: "2rem 3rem" }}>
+        <Stack direction="column" spacing={0} sx={{ flex: 1, p: "1rem 1rem" }}>
           {formKwargs.map((x) => {
             return renderExtendedInput(x);
           })}
@@ -170,13 +170,12 @@ export const InputBar = React.forwardRef(
           width: "100%",
         }}
       >
+
         <Box
           sx={{
             p: "2px 4px",
             display: "flex",
-
             background: "var(--foreground-container-color)",
-
             borderRadius: theme.shape.borderRadius + "px",
             border: "1px solid var(--box-shadow-color)",
             width: "100%",
@@ -195,6 +194,25 @@ export const InputBar = React.forwardRef(
                 }),
           }}
         >
+          <Stack direction="column" spacing={0} width="100%">
+          {selectedTool && (
+              <Box sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              >
+              <Typography
+                  variant="subtitle2"
+                  fontSize={"small"}
+                  sx={{ mr: "10px", color: "var(--support-text-color)"}}
+              >
+                {selectedTool.name}
+              </Typography>
+              </Box>
+          )}
+            <Stack direction="row" spacing={1}>
+
           {!isExtended && (
             <IconButton
               sx={{ p: "10px" }}
@@ -208,15 +226,7 @@ export const InputBar = React.forwardRef(
               />
             </IconButton>
           )}
-          {selectedTool && (
-            <Typography
-              variant="subtitle2"
-              fontSize={"small"}
-              sx={{ mr: "10px", color: "var(--support-text-color)" }}
-            >
-              {selectedTool.name}
-            </Typography>
-          )}
+
 
           {isExtended &&
           selectedTool.kwargs &&
@@ -257,7 +267,7 @@ export const InputBar = React.forwardRef(
               <IconButton
                 onClick={closeExtended}
                 sx={{
-                  p: "10px",
+                  p: "5px",
                   color: "var(--generic-text-color)",
                 }}
                 aria-label="directions"
@@ -315,6 +325,8 @@ export const InputBar = React.forwardRef(
                 <Close />
               </IconButton>
             )}
+          </Stack>
+            </Stack>
           </Stack>
         </Box>
 
