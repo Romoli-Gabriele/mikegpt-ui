@@ -5,7 +5,6 @@ import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -13,6 +12,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ico from "../assets/mike_logo.png";
 import { SettingsModal } from "./SettingsModal.jsx";
 import {
+  Add,
   Chat,
   ChevronLeft,
   ChevronRight,
@@ -123,26 +123,45 @@ export default function MiniDrawer() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} >
+        <Box sx={{borderRight: "solid #cccccc 1px", height: "100%"}}>
         <List>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={styles.listItemButton}
-              onClick={ConversationService.createNewConversation}
-            >
-              <ListItemIcon>
-                <img
+          <ListItem disablePadding={true} sx={{ display: "block" }}>
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <img
                   src={ico}
                   alt="ico"
                   style={{
-                    width: "2.5rem",
-                    paddingRight: "1rem",
+                    width: "3rem",
                   }}
-                />
+              />
+            </Box>
+          </ListItem>
+          <ListItem disablePadding sx={{display: "block"}}>
+            <ListItemButton
+                sx={styles.listItemButton}
+                onClick={handleOpenClose}
+            >
+              <ListItemIcon>
+                {open ? <ChevronLeft /> : <ChevronRight />}
               </ListItemIcon>
               <ListItemText
-                primary="New Chat"
+                primary="Close"
                 primaryTypographyProps={styles.itemLabelTypographyProps}
+              />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+                sx={styles.listItemButton}
+                onClick={ConversationService.createNewConversation}
+            >
+              <ListItemIcon>
+                <Add />
+              </ListItemIcon>
+              <ListItemText
+                  primary="New Chat"
+                  primaryTypographyProps={styles.itemLabelTypographyProps}
               />
             </ListItemButton>
           </ListItem>
@@ -276,34 +295,9 @@ export default function MiniDrawer() {
             </ListItemButton>
           </ListItem>
         </List>
+        </Box>
       </Drawer>
-      {/* Ceneterd arrow to open/close the drawer */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "100%",
-          zIndex: 1,
-          backgroundColor: "var(--background-highlight-color)",
-        }}
-      >
-        <IconButton onClick={handleOpenClose}>
-          {open ? (
-            <ChevronLeft
-              fontSize="large"
-              sx={{ color: "var(--support-text-color)" }}
-            />
-          ) : (
-            <ChevronRight
-              fontSize="large"
-              sx={{ color: "var(--support-text-color)" }}
-            />
-          )}
-        </IconButton>
-      </Box>
+
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />
     </Box>
   );

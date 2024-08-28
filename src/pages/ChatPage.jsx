@@ -61,7 +61,9 @@ const ChatPage = () => {
   };
 
   // Controlla se l'utente è su mobile
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSm = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMd = useMediaQuery(theme.breakpoints.down("md"));
+
 
 
   useEffect(() => {
@@ -204,7 +206,7 @@ const ChatPage = () => {
                 direction={"column"}
                 spacing={2}
                 sx={{
-                  maxWidth: "75%",
+                  maxWidth: "100%",
                   minWidth: "240px",
                   position: "relative",
                   background:
@@ -338,10 +340,14 @@ const ChatPage = () => {
   };
 
   return (
+      <>
     <Container
       sx={{
         flexGrow: 1,
         mb: 1,
+        maxHeight: "100%",
+        paddingBottom: isSm ? "2vh" : 0,
+        overflowY: "auto",
       }}
     >
       <Stack direction={"column"} sx={{ height: "100%" }}>
@@ -391,8 +397,9 @@ const ChatPage = () => {
           </Box>
         </Stack>
       </Stack>
-      {!isMobile && <MinimizedFooter />}
     </Container>
+    {!isSm && !isMd && <MinimizedFooter />}
+  </>
   );
 };
 

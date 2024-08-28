@@ -2,7 +2,6 @@ import { Link, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Box, Stack, Toolbar, useTheme } from "@mui/material";
 import legalgpt_logo from "../assets/legalgpt_logo.png";
-import { drawerWidth } from "../config";
 import { useEffect, useState } from "react";
 import { fetchAuthSession } from "aws-amplify/auth";
 import AppDrawer from "./Drawer";
@@ -35,9 +34,10 @@ export const ProtectedLayout = () => {
   };
 
   return (
+      <>
+          {/** DRAWER */}<AppDrawer />
     <Box sx={{ display: "flex", minHeight: "100%" }}>
-      {/** DRAWER */}
-      <AppDrawer />
+
       {/** APP */}
       <Box
         component="main"
@@ -45,7 +45,7 @@ export const ProtectedLayout = () => {
         flexDirection="column"
         sx={{
           flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: "100%",
           height: "100vh",
           background: "var(--background-highlight-color)",
         }}
@@ -59,8 +59,9 @@ export const ProtectedLayout = () => {
           </Stack>
         </Toolbar>
         {/** CONTENUTO PAGINA */}
-        <Outlet />
+        <Outlet sx={{maxHeight: "70%", overflowY: "auto"}} />
       </Box>
     </Box>
+</>
   );
 };

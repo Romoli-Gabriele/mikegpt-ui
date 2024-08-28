@@ -9,7 +9,8 @@ import { NoMarginTypography } from "./utils";
 import { useMediaQuery, useTheme } from "@mui/material";
 
 const SuggestionCard = styled(Paper)(({ theme }) => ({
-  padding: "3rem",
+  padding: "1rem",
+  width: "100%",
   borderRadius: theme.shape.borderRadius,
   boxShadow: theme.shadows[1],
   height: "100%",
@@ -49,7 +50,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
 
   const renderSuggestionCard = (item, index) => {
     return (
-      <Grid item xs={12} sm={8} md={5} key={index}>
+      <Grid item xs={12} sm={6} md={4} key={index}>
         <SuggestionCard onClick={() => onToolPress(item)}>
           {item ? (
             <Stack>
@@ -80,18 +81,10 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
       marginBottom={"5rem"}
       direction={"column"}
       justifyContent={"space-around"}
-      spacing={2}
-      sx={{ width: "100%", height: "100%" }}
+      spacing={1}
+      sx={{ width: "100%", maxHeight: "110%",  overflowY: "auto", padding: "1rem" }}
     >
       <div>
-        <img
-          src={mike_logo}
-          style={{
-            resizeMode: "contain",
-            width: "6rem",
-            paddingBottom: "1rem",
-          }}
-        />
         <NoMarginTypography variant={"h5"} fontWeight="bold">
           {user
             ? `Hello, ${user.given_name ?? ""} ${user.family_name ?? ""}`
@@ -107,8 +100,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
           direction={"row"}
           alignItems={"center"}
           spacing={1}
-          sx={{ width: "100%" }}
-          mb={2}
+          sx={{ width: "100%", marginBottom: "1rem" }}
         >
           <ElectricBolt style={{ color: "var(--support-text-color)" }} />
           <NoMarginTypography
@@ -119,6 +111,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
             Suggested
           </NoMarginTypography>
         </Stack>
+
         <Grid
           container
           rowSpacing={GRID_SPACING_ROW}

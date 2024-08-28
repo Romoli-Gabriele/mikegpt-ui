@@ -178,6 +178,7 @@ export const InputBar = React.forwardRef(
             background: "var(--foreground-container-color)",
 
             borderRadius: theme.shape.borderRadius + "px",
+            border: "1px solid var(--box-shadow-color)",
             width: "100%",
             boxShadow: theme.shadows[1],
 
