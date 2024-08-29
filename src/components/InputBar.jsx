@@ -9,7 +9,7 @@ import {
   ListItemButton,
   Popover,
   Stack,
-  Typography,
+  Typography, useMediaQuery,
 } from "@mui/material";
 import { ArrowUpwardOutlined, ElectricBolt, Close } from "@mui/icons-material";
 import { styled } from "@mui/system";
@@ -46,6 +46,8 @@ export const InputBar = React.forwardRef(
     const [kwargs, setKwargs] = useState({});
     const [value, setValue] = useState("");
     const [messageId, setMessageId] = useState(null);
+    const isSm = useMediaQuery(theme.breakpoints.down("sm"));
+    const isMd = useMediaQuery(theme.breakpoints.down("md"));
 
     const canSubmit = useMemo(() => {
       if (loading) return false;
@@ -194,6 +196,7 @@ export const InputBar = React.forwardRef(
                 }),
           }}
         >
+
           <Stack direction="column" spacing={0} width="100%">
           {selectedTool && (
               <Box sx={{
@@ -234,7 +237,6 @@ export const InputBar = React.forwardRef(
             renderExtendedForm(selectedTool.kwargs)
           ) : (
             <>
-              <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
               <InputBase
                 sx={{
                   ml: 1,

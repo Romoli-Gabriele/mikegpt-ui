@@ -123,7 +123,7 @@ export default function MiniDrawer() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Drawer variant="permanent" open={open} >
+      <Drawer variant="permanent" open={open}>
         <Box sx={{borderRight: "solid #cccccc 1px", height: "100%"}}>
         <List>
           <ListItem disablePadding={true} sx={{ display: "block" }}>
@@ -222,8 +222,7 @@ export default function MiniDrawer() {
             </ListItemButton>
           </ListItem>
         </List>
-        <Divider />
-        <List>
+          {open && <List>
           {searchResults.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
@@ -254,6 +253,7 @@ export default function MiniDrawer() {
               <ListItemIcon>
                 <Chat />
               </ListItemIcon>
+
               <ListItemText
                 primary="Chat 1"
                 primaryTypographyProps={styles.itemLabelTypographyProps}
@@ -261,40 +261,7 @@ export default function MiniDrawer() {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                ...styles.listItemButton,
-                display: "flex",
-              }}
-            >
-              <ListItemIcon>
-                <Chat />
-              </ListItemIcon>
-              <ListItemText
-                primary="Chat 2"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                ...styles.listItemButton,
-                display: "flex",
-              }}
-            >
-              <ListItemIcon>
-                <Chat />
-              </ListItemIcon>
-              <ListItemText
-                primary="Chat 3"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+        </List> }
         </Box>
       </Drawer>
 
