@@ -4,28 +4,31 @@ import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ico from "../assets/mike_logo.png";
+import { drawerWidth } from "../config.jsx";
 import { SettingsModal } from "./SettingsModal.jsx";
 import {
   Add,
   Chat,
   ChevronLeft,
   ChevronRight,
+  Close,
   Dashboard,
+  MoreHorizOutlined,
   Search,
   SettingsOutlined,
+  TimerSharp,
+  X,
 } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { ConversationService } from "../services/ConversationService.jsx";
 import { Typography } from "@mui/material";
 import { useStoreState } from "easy-peasy";
-const drawerWidth = 240;
 
 const BORDER_RADIUS = "17px";
 
@@ -103,7 +106,6 @@ export default function MiniDrawer() {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const inputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
   const { user, logout } = useAuth();
   const currentConversationId = useStoreState(
     (state) => state.chat.conversationId
@@ -111,19 +113,31 @@ export default function MiniDrawer() {
   const conversations = useStoreState((state) => state.chat.conversations);
 
   const chats = React.useMemo(() => {
+    let filteredConversations = [...conversations].filter(
+      (conversation) =>
+        // Elimina le conversazioni piu vecchie di 30 giorni
+        new Date().getDate() - conversation.date.getDate() <= 30
+    );
+
+    if (searchTerm && searchTerm.length >= 3) {
+      // usa una espressione regolare per cercare il termine di ricerca parziale e case insensitive
+      const regex = new RegExp(searchTerm, "i");
+      filteredConversations = filteredConversations.filter((conversation) =>
+        regex.test(conversation.title)
+      );
+    }
+
     return {
       today:
-        conversations?.filter(
+        filteredConversations?.filter(
           (conversation) => new Date().getDate() === conversation.date.getDate()
         ) || [],
       last30Days:
-        conversations?.filter(
-          (conversation) =>
-            new Date().getDate() - conversation.date.getDate() <= 30 &&
-            new Date().getDate() !== conversation.date.getDate()
+        filteredConversations?.filter(
+          (conversation) => new Date().getDate() !== conversation.date.getDate()
         ) || [],
     };
-  }, [conversations]);
+  }, [conversations, searchTerm]);
 
   const handleOpenClose = () => {
     setOpen(!open);
@@ -136,9 +150,6 @@ export default function MiniDrawer() {
   const handleSearch = (event) => {
     const { value } = event.target;
     setSearchTerm(value);
-
-    const results = [];
-    setSearchResults(results);
   };
 
   const renderChat = (chat, index) => {
@@ -161,6 +172,7 @@ export default function MiniDrawer() {
           primary={chat.title || "Untitled chat"}
           primaryTypographyProps={styles.itemLabelTypographyProps}
         />
+        <MoreHorizOutlined fontSize="small" />
       </ListItemButton>
     );
   };
@@ -168,24 +180,28 @@ export default function MiniDrawer() {
   const renderChats = () => {
     return (
       <>
-        <Typography
-          fontSize="small"
-          color="textSecondary"
-          fontWeight={"bold"}
-          sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
-        >
-          Today
-        </Typography>
+        {chats.today.length > 0 && (
+          <Typography
+            fontSize="small"
+            color="textSecondary"
+            fontWeight={"bold"}
+            sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
+          >
+            Today
+          </Typography>
+        )}
         {chats.today.map((chat, index) => renderChat(chat, index))}
 
-        <Typography
-          fontSize="small"
-          color="textSecondary"
-          fontWeight={"bold"}
-          sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
-        >
-          Last 30 days
-        </Typography>
+        {chats.last30Days.length > 0 && (
+          <Typography
+            fontSize="small"
+            color="textSecondary"
+            fontWeight={"bold"}
+            sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
+          >
+            Last 30 days
+          </Typography>
+        )}
         {chats.last30Days.map((chat, index) => renderChat(chat, index))}
       </>
     );
@@ -301,26 +317,6 @@ export default function MiniDrawer() {
           </List>
           {open && (
             <List>
-              {searchResults.map((item, index) => (
-                <ListItem key={index} disablePadding sx={{ display: "block" }}>
-                  <ListItemButton
-                    key={index}
-                    sx={{
-                      ...styles.listItemButton,
-                      display: "flex",
-                    }}
-                  >
-                    <ListItemIcon>
-                      <Chat />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item}
-                      primaryTypographyProps={styles.itemLabelTypographyProps}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-
               <ListItem disablePadding sx={{ display: "block" }}>
                 {renderChats()}
               </ListItem>
