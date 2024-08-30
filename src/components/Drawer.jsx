@@ -16,15 +16,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Dashboard,
+  LogoutOutlined,
   Search,
   SettingsOutlined,
 } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { ConversationService } from "../services/ConversationService.jsx";
-import { Typography } from "@mui/material";
+import { Avatar, IconButton, Typography, useMediaQuery } from "@mui/material";
 import { useStoreState } from "easy-peasy";
 import { ChatItem } from "./ChatItem.jsx";
+import { useTheme } from "@emotion/react";
 
 const BORDER_RADIUS = "17px";
 
@@ -107,6 +109,14 @@ export default function MiniDrawer() {
     (state) => state.chat.conversationId
   );
   const conversations = useStoreState((state) => state.chat.conversations);
+
+  const theme = useTheme();
+  const sm = useMediaQuery(theme.breakpoints.down("sm"));
+  const md = useMediaQuery(theme.breakpoints.down("md"));
+
+  const handleSignOut = () => {
+    logout().then();
+  };
 
   const chats = React.useMemo(() => {
     let filteredConversations = [...conversations].filter(
@@ -297,14 +307,52 @@ export default function MiniDrawer() {
               </ListItemButton>
             </ListItem>
           </List>
-          {open && (
-            <List>
-              <ListItem disablePadding sx={{ display: "block" }}>
-                {renderChats()}
-              </ListItem>
-            </List>
-          )}
+          {open && <List>{renderChats()}</List>}
         </Box>
+
+        <ListItem
+          sx={{
+            marginTop: "auto",
+            justifyContent: open ? "flex-start" : "center",
+            flexDirection: "row",
+          }}
+        >
+          <Avatar
+            alt={`${user.given_name ?? ""} ${user.family_name}`}
+            sx={{
+              color: theme.palette.primary.contrastText,
+              backgroundColor: theme.palette.primary.main,
+            }}
+          >
+            {user.given_name?.charAt(0) ?? ""}
+          </Avatar>
+
+          {open && (
+            <Typography
+              variant={md ? "subtitle2" : "subtitle1"}
+              color={"primary"}
+              noWrap
+              sx={{
+                mr: { sm: 0.3, md: 1 },
+                ml: { sm: 0.3, md: 1 },
+                mb: 0,
+              }}
+            >
+              {user.given_name ?? ""} {user.family_name ?? ""}
+            </Typography>
+          )}
+
+          {open && (
+            <IconButton edge="end" onClick={handleSignOut}>
+              <LogoutOutlined color="primary" />
+            </IconButton>
+          )}
+        </ListItem>
+        {!open && (
+          <IconButton edge="end" onClick={handleSignOut}>
+            <LogoutOutlined color="primary" />
+          </IconButton>
+        )}
       </Drawer>
 
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />

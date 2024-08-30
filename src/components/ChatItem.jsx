@@ -2,10 +2,8 @@ import {
   Box,
   IconButton,
   ListItem,
-  ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Stack,
 } from "@mui/material";
 import { ConversationService } from "../services/ConversationService";
 import { MoreHorizOutlined } from "@mui/icons-material";
@@ -16,9 +14,7 @@ import { drawerItemMarginPx } from "../config";
 
 export const ChatItem = ({ chat, currentConversationId, styles }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const isSelected = chat.conversationId === currentConversationId;
-
   const theme = useTheme();
 
   return (
@@ -51,10 +47,6 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
             sx={{
               color: theme.palette.text.secondary,
               "&:hover": {
-                backgroundColor: "transparent",
-                color: theme.palette.text.primary,
-              },
-              "&:focus": {
                 backgroundColor: "transparent",
                 color: theme.palette.text.primary,
               },
