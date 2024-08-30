@@ -9,26 +9,22 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ico from "../assets/mike_logo.png";
-import { drawerWidth } from "../config.jsx";
+import { drawerWidth, drawerItemMarginPx } from "../config.jsx";
 import { SettingsModal } from "./SettingsModal.jsx";
 import {
   Add,
-  Chat,
   ChevronLeft,
   ChevronRight,
-  Close,
   Dashboard,
-  MoreHorizOutlined,
   Search,
   SettingsOutlined,
-  TimerSharp,
-  X,
 } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { ConversationService } from "../services/ConversationService.jsx";
 import { Typography } from "@mui/material";
 import { useStoreState } from "easy-peasy";
+import { ChatItem } from "./ChatItem.jsx";
 
 const BORDER_RADIUS = "17px";
 
@@ -38,7 +34,7 @@ const styles = {
     borderWidth: "1px",
     borderColor: "var(--background-highlight-color)",
     borderStyle: "dashed",
-    margin: "5px",
+    margin: drawerItemMarginPx + "px",
     display: "flex",
     alignItems: "center",
   },
@@ -153,27 +149,13 @@ export default function MiniDrawer() {
   };
 
   const renderChat = (chat, index) => {
-    const isSelected = chat.conversationId === currentConversationId;
     return (
-      <ListItemButton
+      <ChatItem
+        chat={chat}
         key={chat.conversationId}
-        sx={{
-          ...styles.listItemButton,
-          display: "flex",
-          backgroundColor: isSelected
-            ? "var(--background-highlight-color)"
-            : "",
-        }}
-        onClick={() => {
-          ConversationService.openConversation(chat.conversationId);
-        }}
-      >
-        <ListItemText
-          primary={chat.title || "Untitled chat"}
-          primaryTypographyProps={styles.itemLabelTypographyProps}
-        />
-        <MoreHorizOutlined fontSize="small" />
-      </ListItemButton>
+        currentConversationId={currentConversationId}
+        styles={styles}
+      />
     );
   };
 

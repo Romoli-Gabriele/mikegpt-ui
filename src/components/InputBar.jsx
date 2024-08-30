@@ -9,7 +9,8 @@ import {
   ListItemButton,
   Popover,
   Stack,
-  Typography, useMediaQuery,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { ArrowUpwardOutlined, ElectricBolt, Close } from "@mui/icons-material";
 import { styled } from "@mui/system";
@@ -88,7 +89,7 @@ export const InputBar = React.forwardRef(
       setSelectedTool(tool);
       handleToolsPopupClose();
       console.log("TOOL SELECTED:", tool);
-      if (tool.isForm && tool.kwargs && tool.kwargs.length > 0) {
+      if (tool && tool.isForm && tool.kwargs && tool.kwargs.length > 0) {
         setIsExtended(true);
         console.log("EXTENDED FORM OPENED");
       } else if (isExtended) setIsExtended(false);
@@ -172,7 +173,6 @@ export const InputBar = React.forwardRef(
           width: "100%",
         }}
       >
-
         <Box
           sx={{
             p: "2px 4px",
@@ -196,138 +196,136 @@ export const InputBar = React.forwardRef(
                 }),
           }}
         >
-
           <Stack direction="column" spacing={0} width="100%">
-          {selectedTool && (
-              <Box sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+            {selectedTool && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-              <Typography
+                <Typography
                   variant="subtitle2"
                   fontSize={"small"}
-                  sx={{ mr: "10px", color: "var(--support-text-color)"}}
-              >
-                {selectedTool.name}
-              </Typography>
-              </Box>
-          )}
-            <Stack direction="row" spacing={1}>
-
-          {!isExtended && (
-            <IconButton
-              sx={{ p: "10px" }}
-              aria-label="menu"
-              onClick={handleBoltClick}
-            >
-              <ElectricBolt
-                style={{
-                  color: "var(--support-text-color)",
-                }}
-              />
-            </IconButton>
-          )}
-
-
-          {isExtended &&
-          selectedTool.kwargs &&
-          selectedTool.kwargs.length > 0 ? (
-            renderExtendedForm(selectedTool.kwargs)
-          ) : (
-            <>
-              <InputBase
-                sx={{
-                  ml: 1,
-                  flex: 1,
-                  color: "var(----main-title-color)",
-                  fontWeight: "bold",
-                }}
-                placeholder="Send a Message"
-                inputProps={{
-                  "aria-label": "send a message",
-                  maxLength: QUERY_MAX_TOKEN,
-                }}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    submit();
-                  }
-                }}
-              />
-            </>
-          )}
-
-          <Stack
-            justifyContent={isExtended ? "space-around" : "center"}
-            direction={isExtended ? "column" : "row"}
-            spacing={isExtended ? 0 : 1}
-          >
-            {isExtended && (
-              <IconButton
-                onClick={closeExtended}
-                sx={{
-                  p: "5px",
-                  color: "var(--generic-text-color)",
-                }}
-                aria-label="directions"
-              >
-                <Close />
-              </IconButton>
-            )}
-
-            <IconButton
-              disabled={!canSubmit}
-              onClick={submit}
-              sx={{
-                p: "10px",
-                color: "var(--generic-text-color)",
-                background: "var(--background-highlight-color)",
-                "&:hover": {
-                  background: "var(--blue)",
-                  color: "var(--foreground-container-color)",
-                },
-                borderRadius: !messageId
-                  ? "50%"
-                  : theme.shape.borderRadius + "px",
-              }}
-              aria-label="directions"
-            >
-              {loading ? (
-                <CircularProgress
-                  size="1.5rem"
-                  style={{ color: theme.palette.primary }}
-                />
-              ) : (
-                <ArrowUpwardOutlined />
-              )}
-
-              {messageId && !isExtended && (
-                <Typography sx={{ pl: 1, pr: 1 }} fontSize={"small"}>
-                  Edit
+                  sx={{ mr: "10px", color: "var(--support-text-color)" }}
+                >
+                  {selectedTool.name}
                 </Typography>
-              )}
-            </IconButton>
-
-            {messageId && !isExtended && (
-              <IconButton
-                onClick={clear}
-                sx={{
-                  p: "10px",
-                  aspectRatio: 1,
-                  color: "var(--generic-text-color)",
-                  "&:hover": {
-                    background: "transparent",
-                    color: theme.palette.error.main,
-                  },
-                }}
-              >
-                <Close />
-              </IconButton>
+              </Box>
             )}
-          </Stack>
+            <Stack direction="row" spacing={1}>
+              {!isExtended && (
+                <IconButton
+                  sx={{ p: "10px" }}
+                  aria-label="menu"
+                  onClick={handleBoltClick}
+                >
+                  <ElectricBolt
+                    style={{
+                      color: "var(--support-text-color)",
+                    }}
+                  />
+                </IconButton>
+              )}
+
+              {isExtended &&
+              selectedTool?.kwargs &&
+              selectedTool.kwargs.length > 0 ? (
+                renderExtendedForm(selectedTool?.kwargs)
+              ) : (
+                <>
+                  <InputBase
+                    sx={{
+                      ml: 1,
+                      flex: 1,
+                      color: "var(----main-title-color)",
+                      fontWeight: "bold",
+                    }}
+                    placeholder="Send a Message"
+                    inputProps={{
+                      "aria-label": "send a message",
+                      maxLength: QUERY_MAX_TOKEN,
+                    }}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        submit();
+                      }
+                    }}
+                  />
+                </>
+              )}
+
+              <Stack
+                justifyContent={isExtended ? "space-around" : "center"}
+                direction={isExtended ? "column" : "row"}
+                spacing={isExtended ? 0 : 1}
+              >
+                {isExtended && (
+                  <IconButton
+                    onClick={closeExtended}
+                    sx={{
+                      p: "5px",
+                      color: "var(--generic-text-color)",
+                    }}
+                    aria-label="directions"
+                  >
+                    <Close />
+                  </IconButton>
+                )}
+
+                <IconButton
+                  disabled={!canSubmit}
+                  onClick={submit}
+                  sx={{
+                    p: "10px",
+                    color: "var(--generic-text-color)",
+                    background: "var(--background-highlight-color)",
+                    "&:hover": {
+                      background: "var(--blue)",
+                      color: "var(--foreground-container-color)",
+                    },
+                    borderRadius: !messageId
+                      ? "50%"
+                      : theme.shape.borderRadius + "px",
+                  }}
+                  aria-label="directions"
+                >
+                  {loading ? (
+                    <CircularProgress
+                      size="1.5rem"
+                      style={{ color: theme.palette.primary }}
+                    />
+                  ) : (
+                    <ArrowUpwardOutlined />
+                  )}
+
+                  {messageId && !isExtended && (
+                    <Typography sx={{ pl: 1, pr: 1 }} fontSize={"small"}>
+                      Edit
+                    </Typography>
+                  )}
+                </IconButton>
+
+                {messageId && !isExtended && (
+                  <IconButton
+                    onClick={clear}
+                    sx={{
+                      p: "10px",
+                      aspectRatio: 1,
+                      color: "var(--generic-text-color)",
+                      "&:hover": {
+                        background: "transparent",
+                        color: theme.palette.error.main,
+                      },
+                    }}
+                  >
+                    <Close />
+                  </IconButton>
+                )}
+              </Stack>
             </Stack>
           </Stack>
         </Box>
