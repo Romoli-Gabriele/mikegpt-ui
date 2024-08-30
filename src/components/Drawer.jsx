@@ -23,6 +23,8 @@ import {
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { ConversationService } from "../services/ConversationService.jsx";
+import { Typography } from "@mui/material";
+import { useStoreState } from "easy-peasy";
 const drawerWidth = 240;
 
 const BORDER_RADIUS = "17px";
@@ -103,6 +105,25 @@ export default function MiniDrawer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const { user, logout } = useAuth();
+  const currentConversationId = useStoreState(
+    (state) => state.chat.conversationId
+  );
+  const conversations = useStoreState((state) => state.chat.conversations);
+
+  const chats = React.useMemo(() => {
+    return {
+      today:
+        conversations?.filter(
+          (conversation) => new Date().getDate() === conversation.date.getDate()
+        ) || [],
+      last30Days:
+        conversations?.filter(
+          (conversation) =>
+            new Date().getDate() - conversation.date.getDate() <= 30 &&
+            new Date().getDate() !== conversation.date.getDate()
+        ) || [],
+    };
+  }, [conversations]);
 
   const handleOpenClose = () => {
     setOpen(!open);
@@ -120,148 +141,191 @@ export default function MiniDrawer() {
     setSearchResults(results);
   };
 
+  const renderChat = (chat, index) => {
+    const isSelected = chat.conversationId === currentConversationId;
+    return (
+      <ListItemButton
+        key={chat.conversationId}
+        sx={{
+          ...styles.listItemButton,
+          display: "flex",
+          backgroundColor: isSelected
+            ? "var(--background-highlight-color)"
+            : "",
+        }}
+        onClick={() => {
+          ConversationService.openConversation(chat.conversationId);
+        }}
+      >
+        <ListItemText
+          primary={chat.title || "Untitled chat"}
+          primaryTypographyProps={styles.itemLabelTypographyProps}
+        />
+      </ListItemButton>
+    );
+  };
+
+  const renderChats = () => {
+    return (
+      <>
+        <Typography
+          fontSize="small"
+          color="textSecondary"
+          fontWeight={"bold"}
+          sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
+        >
+          Today
+        </Typography>
+        {chats.today.map((chat, index) => renderChat(chat, index))}
+
+        <Typography
+          fontSize="small"
+          color="textSecondary"
+          fontWeight={"bold"}
+          sx={{ marginLeft: "10px", marginTop: "10px", marginBottom: "10px" }}
+        >
+          Last 30 days
+        </Typography>
+        {chats.last30Days.map((chat, index) => renderChat(chat, index))}
+      </>
+    );
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <Drawer variant="permanent" open={open}>
-        <Box sx={{borderRight: "solid #cccccc 1px", height: "100%"}}>
-        <List>
-          <ListItem disablePadding={true} sx={{ display: "block" }}>
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <img
+        <Box sx={{ borderRight: "solid #cccccc 1px", height: "100%" }}>
+          <List>
+            <ListItem disablePadding={true} sx={{ display: "block" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <img
                   src={ico}
                   alt="ico"
                   style={{
                     width: "3rem",
                   }}
-              />
-            </Box>
-          </ListItem>
-          <ListItem disablePadding sx={{display: "block"}}>
-            <ListItemButton
+                />
+              </Box>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
                 sx={styles.listItemButton}
                 onClick={handleOpenClose}
-            >
-              <ListItemIcon>
-                {open ? <ChevronLeft /> : <ChevronRight />}
-              </ListItemIcon>
-              <ListItemText
-                primary="Close"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-                sx={styles.listItemButton}
-                onClick={ConversationService.createNewConversation}
-            >
-              <ListItemIcon>
-                <Add />
-              </ListItemIcon>
-              <ListItemText
-                  primary="New Chat"
-                  primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={styles.listItemButton}
-              onClick={handleSettingsOpen}
-            >
-              <ListItemIcon>
-                <SettingsOutlined fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Settings"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton sx={styles.listItemButton}>
-              <ListItemIcon>
-                <Dashboard fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Workspace"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                ...styles.listItemButton,
-                backgroundColor: "#F5F5F5",
-                display: "flex",
-              }}
-              onClick={() => {
-                setOpen(true);
-                inputRef.current?.focus();
-              }}
-              onMouseEnter={(event) => {
-                event.currentTarget.style.cursor = "text";
-              }}
-            >
-              <ListItemIcon>
-                <Search />
-              </ListItemIcon>
-              <input
-                value={searchTerm}
-                onChange={handleSearch}
-                className="search-input"
-                ref={inputRef}
-                placeholder="Search"
-                style={{
-                  ...styles.searchInput,
-                  fontSize: styles.itemLabelTypographyProps.fontSize,
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-          {open && <List>
-          {searchResults.map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                key={index}
-                sx={{
-                  ...styles.listItemButton,
-                  display: "flex",
-                }}
               >
                 <ListItemIcon>
-                  <Chat />
+                  {open ? <ChevronLeft /> : <ChevronRight />}
                 </ListItemIcon>
                 <ListItemText
-                  primary={item}
+                  primary="Close"
                   primaryTypographyProps={styles.itemLabelTypographyProps}
                 />
               </ListItemButton>
             </ListItem>
-          ))}
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={styles.listItemButton}
+                onClick={ConversationService.openNewConversation}
+              >
+                <ListItemIcon>
+                  <Add />
+                </ListItemIcon>
+                <ListItemText
+                  primary="New Chat"
+                  primaryTypographyProps={styles.itemLabelTypographyProps}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={styles.listItemButton}
+                onClick={handleSettingsOpen}
+              >
+                <ListItemIcon>
+                  <SettingsOutlined fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Settings"
+                  primaryTypographyProps={styles.itemLabelTypographyProps}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton sx={styles.listItemButton}>
+                <ListItemIcon>
+                  <Dashboard fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Workspace"
+                  primaryTypographyProps={styles.itemLabelTypographyProps}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={{
+                  ...styles.listItemButton,
+                  backgroundColor: "#F5F5F5",
+                  display: "flex",
+                }}
+                onClick={() => {
+                  setOpen(true);
+                  inputRef.current?.focus();
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.cursor = "text";
+                }}
+              >
+                <ListItemIcon>
+                  <Search />
+                </ListItemIcon>
+                <input
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="search-input"
+                  ref={inputRef}
+                  placeholder="Search"
+                  style={{
+                    ...styles.searchInput,
+                    fontSize: styles.itemLabelTypographyProps.fontSize,
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          {open && (
+            <List>
+              {searchResults.map((item, index) => (
+                <ListItem key={index} disablePadding sx={{ display: "block" }}>
+                  <ListItemButton
+                    key={index}
+                    sx={{
+                      ...styles.listItemButton,
+                      display: "flex",
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Chat />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item}
+                      primaryTypographyProps={styles.itemLabelTypographyProps}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
 
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                ...styles.listItemButton,
-                display: "flex",
-              }}
-            >
-              <ListItemIcon>
-                <Chat />
-              </ListItemIcon>
-
-              <ListItemText
-                primary="Chat 1"
-                primaryTypographyProps={styles.itemLabelTypographyProps}
-              />
-            </ListItemButton>
-          </ListItem>
-
-        </List> }
+              <ListItem disablePadding sx={{ display: "block" }}>
+                {renderChats()}
+              </ListItem>
+            </List>
+          )}
         </Box>
       </Drawer>
 
