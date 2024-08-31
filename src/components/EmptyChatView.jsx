@@ -15,7 +15,7 @@ const SuggestionCard = styled(Paper)(({ theme }) => ({
   boxShadow: theme.shadows[1],
   height: "100%",
   minHeight: "8rem",
-  marginBottom: "2rem",
+  marginBottom: "1rem",
   "&:hover": {
     cursor: "pointer",
     boxShadow: theme.shadows[3],
@@ -82,7 +82,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
       direction={"column"}
       justifyContent={"space-around"}
       spacing={1}
-      sx={{ width: "100%", maxHeight: "100%",  overflowY: "auto", padding: "1rem" }}
+      sx={{ width: "100%", maxHeight: "100%",  overflowY: "auto", padding: 0 }}
     >
       <div>
         <NoMarginTypography variant={"h5"} fontWeight="bold">

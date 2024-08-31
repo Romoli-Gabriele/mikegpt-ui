@@ -26,7 +26,7 @@ const RegisterPage = () => {
         if (!res.success) {
             setError(res.error);
         } else {
-            navigate('/');
+            navigate('/products');
         }
     }
 

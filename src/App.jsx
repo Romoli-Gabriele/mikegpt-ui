@@ -8,6 +8,7 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import {Amplify} from "aws-amplify";
 import awsExports from "./aws-exports.jsx";
 import UploadDocumentPage from "./pages/UploadDocumentPage.jsx";
+import ProductListView from "./components/ProductListView.jsx";
 
 Amplify.configure({
     Auth: {
@@ -47,11 +48,12 @@ export const router = createBrowserRouter(
             {/*<Route path="/new-password" element={<NewPasswordPage />} />*/}
             {/*<Route path="/forgot-password" element={<ForgotPasswordPage />} />*/}
             {/*<Route path="/reset-password" element={<ResetPasswordPage />} />*/}
-
+            <Route path="/products" element={<ProductListView />} />
             <Route path="/" element={<ProtectedLayout />}>
                 <Route path="" element={<ChatPage />} />
                 {/*<Route path="upload" element={<UploadDocumentPage />} />*/}
             </Route>
+
         </Route>
     )
 );

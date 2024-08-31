@@ -13,7 +13,6 @@ import { PoliciesLinks } from "./Footer";
 import PropTypes from "prop-types";
 
 export const SettingsModal = ({ open, setOpen }) => {
-  console.log(open);
   const handleClose = () => setOpen(false);
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
