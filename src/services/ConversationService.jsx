@@ -1,8 +1,28 @@
 import { store } from "../store/index.jsx";
 import { lambdaClient, apiClient } from "./ApiService.jsx";
 
-const addConversation = async () => {
-  return await lambdaClient.post("/conversation");
+const createConversation = async () => {
+  // Crea la nuova conversazione lato server
+  const res = await lambdaClient.post("/conversation");
+  if (!res?.data?.conversationid)
+    throw new Error("Failed to create conversation");
+
+  const actions = store.getActions();
+
+  // Aggiunge la nuova conversazione in cima alla lista
+  actions.chat.setConversations([
+    {
+      conversationId: res.data.conversationid,
+      title: undefined,
+      date: new Date(),
+    },
+    ...store.getState().chat.conversations,
+  ]);
+
+  // Imposta l'ID della conversazione come attiva
+  actions.chat.setConversationId(res.data.conversationid);
+
+  return res.data;
 };
 
 const getConversation = async (conversationId) => {
@@ -44,20 +64,45 @@ const processFile = async (file_name, file_title, file_date) => {
   });
 };
 
-const createNewConversation = () => {
-  if (store.getState().chat.messages?.length > 0) {
+const openNewConversation = () => {
+  store.getActions().chat.setMessages([]);
+  store.getActions().chat.setConversationId(null);
+  store.getActions().chat.setLoading(false); // potrebbe essere in corso un caricamentonella vecchia conversazione
+};
+
+const fetchConversationById = async (conversationId) => {
+  return {
+    conversationId: conversationId,
+    messages: [],
+  };
+};
+
+const openConversation = async (conversationId) => {
+  try {
+    store.getActions().chat.setConversationId(conversationId);
+    store.getActions().chat.setLoading(true);
     store.getActions().chat.setMessages([]);
-    store.getActions().chat.setConversationId(null);
-    store.getActions().chat.setLoading(false); // potrebbe essere in corso un caricamentonella vecchia conversazione
+    const conversation = await getConversation(conversationId);
+    if (!conversation) {
+      store.getActions().chat.setLoading(false);
+      return;
+    }
+    store.getActions().chat.setMessages(conversation.messages);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    store.getActions().chat.setLoading(false);
   }
 };
 
 export const ConversationService = {
-  addConversation,
+  createConversation,
   getConversation,
   sendMessage,
   sendFeedback,
   getFileUploadUrl,
   processFile,
-  createNewConversation,
+  openNewConversation,
+  fetchConversationById,
+  openConversation,
 };

@@ -3,11 +3,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { Divider } from "@mui/material";
-import {
-  ModeEdit,
-  Delete,
-  CancelOutlined,
-} from "@mui/icons-material";
+import { ModeEdit, Delete, CancelOutlined } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import { PoliciesLinks } from "./Footer";
 import PropTypes from "prop-types";
@@ -60,7 +56,6 @@ export const SettingsModal = ({ open, setOpen }) => {
     </div>
   );
 };
-
 
 SettingsModal.propTypes = {
   open: PropTypes.bool.isRequired,

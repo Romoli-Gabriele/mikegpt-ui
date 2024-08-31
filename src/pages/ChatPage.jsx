@@ -30,8 +30,6 @@ import dedent from "dedent";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { useMediaQuery } from "@mui/material";
 
-
-
 const CONTENT_PADDING = {
   paddingLeft: "3rem",
   paddingRight: "3rem",
@@ -64,8 +62,6 @@ const ChatPage = () => {
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const isMd = useMediaQuery(theme.breakpoints.down("md"));
 
-
-
   useEffect(() => {
     ConversationService.sendMessage("", "").then();
   }, [conversationId]);
@@ -73,10 +69,10 @@ const ChatPage = () => {
   const createConversation = async () => {
     setLoading(true);
     try {
-      const res = await ConversationService.addConversation();
+      const res = await ConversationService.createConversation();
 
-      setConversationId(res.data["conversationid"]);
-      return res.data["conversationid"];
+      setConversationId(res["conversationid"]);
+      return res["conversationid"];
     } catch (e) {
       console.log(e);
     }
@@ -139,7 +135,8 @@ const ChatPage = () => {
         // Controlla se l'utente è ancora nella chat che ha inviato il messaggio e questa non è cambiata
         // Se no c'è il bug che se invio un messaggio e subito dopo prima della risposta  cambio chat
         // La risposta arriva nella chat sbagliata e si porta tutti i vecchi messaggi
-        if (current_conversation_id == conversationId) {
+
+        if (current_conversation_id == conversationId || !conversationId) {
           const responseMessage = {
             data: {
               content: res.data["response"],
@@ -163,7 +160,7 @@ const ChatPage = () => {
   };
 
   const renderContent = () => {
-    if (messages.length === 0)
+    if (!conversationId)
       return (
         <Box sx={{ flexGrow: 1, ...CONTENT_PADDING }}>
           <EmptyChatView
@@ -183,7 +180,23 @@ const ChatPage = () => {
           ...CONTENT_PADDING,
         }}
       >
-        {messages.map((message, index) => (
+        {messages?.length === 0 && (
+          <Box
+            sx={{
+              flexGrow: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              display: "flex",
+            }}
+          >
+            <CircularProgress
+              size="2.5rem"
+              style={{ color: theme.palette.text.secondary }}
+            />
+          </Box>
+        )}
+
+        {messages?.map((message, index) => (
           <Stack
             direction={message.type === "ai" ? "row" : "row-reverse"}
             spacing={2}
@@ -259,6 +272,7 @@ const ChatPage = () => {
                 <Box>
                   <Stack direction={"row"}>
                     <IconButton
+                      disabled={!message.data}
                       variant={"contained"}
                       color={"default"}
                       onClick={() => {
@@ -272,6 +286,7 @@ const ChatPage = () => {
                     </IconButton>
 
                     <IconButton
+                      disabled={!message.data}
                       variant={"contained"}
                       color={message.feedback === 1 ? "primary" : "black"}
                       onClick={() => {
@@ -299,6 +314,7 @@ const ChatPage = () => {
                       <ThumbUpRounded />
                     </IconButton>
                     <IconButton
+                      disabled={!message.data}
                       variant={"contained"}
                       color={message.feedback === -1 ? "error" : "black"}
                       onClick={() => {
@@ -340,66 +356,66 @@ const ChatPage = () => {
   };
 
   return (
-      <>
-    <Container
-      sx={{
-        flexGrow: 1,
-        mb: 1,
-        maxHeight: "100%",
-        paddingBottom: isSm ? "2vh" : 0,
-        overflowY: "auto",
-      }}
-    >
-      <Stack direction={"column"} sx={{ height: "100%" }}>
-        {renderContent()}
+    <>
+      <Container
+        sx={{
+          flexGrow: 1,
+          mb: 1,
+          maxHeight: "100%",
+          paddingBottom: isSm ? "2vh" : 0,
+          overflowY: "auto",
+        }}
+      >
+        <Stack direction={"column"} sx={{ height: "100%" }}>
+          {renderContent()}
 
-        <Stack
-          direction={"column"}
-          spacing={1}
-          alignItems={"start"}
-          sx={{
-            ...CONTENT_PADDING,
-          }}
-        >
-          {/* insert a select */}
-          {import.meta.env.VITE_DEBUG_SELECT === "true" && (
-            <FormControl sx={{ width: "15rem", maxWidth: "100%" }}>
-              <InputLabel id="debug-select-label">A / B Testing</InputLabel>
-              <Select
-                labelId="debug-select-label"
-                id="debug-select"
-                value={debugAB}
-                label="A / B Testing"
-                onChange={(e) => setDebugAB(e.target.value)}
-              >
-                <MenuItem value={"A"}>A</MenuItem>
-                <MenuItem value={"B"}>B</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-
-          <Box
+          <Stack
+            direction={"column"}
+            spacing={1}
+            alignItems={"start"}
             sx={{
-              position: "fixed",
-              bottom: 0,
-              right: isSm ? "10%" : "20%",
-              left: isSm ? "10%" : "20%",
-              width: isSm ? "80%" : "60%",
-              zIndex: 1000,
-              padding: theme.spacing(3), // Optional: to add some padding
+              ...CONTENT_PADDING,
             }}
           >
-            <InputBar
-              onSubmit={sendMessage}
-              ref={inputBarRef}
-              loading={loading}
-            />
-          </Box>
+            {/* insert a select */}
+            {import.meta.env.VITE_DEBUG_SELECT === "true" && (
+              <FormControl sx={{ width: "15rem", maxWidth: "100%" }}>
+                <InputLabel id="debug-select-label">A / B Testing</InputLabel>
+                <Select
+                  labelId="debug-select-label"
+                  id="debug-select"
+                  value={debugAB}
+                  label="A / B Testing"
+                  onChange={(e) => setDebugAB(e.target.value)}
+                >
+                  <MenuItem value={"A"}>A</MenuItem>
+                  <MenuItem value={"B"}>B</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+
+            <Box
+              sx={{
+                position: "fixed",
+                bottom: 0,
+                right: isSm ? "10%" : "20%",
+                left: isSm ? "10%" : "20%",
+                width: isSm ? "80%" : "60%",
+                zIndex: 1000,
+                padding: theme.spacing(3), // Optional: to add some padding
+              }}
+            >
+              <InputBar
+                onSubmit={sendMessage}
+                ref={inputBarRef}
+                loading={loading}
+              />
+            </Box>
+          </Stack>
         </Stack>
-      </Stack>
-    </Container>
-    {!isSm && !isMd && <MinimizedFooter />}
-  </>
+      </Container>
+      {!isSm && !isMd && <MinimizedFooter />}
+    </>
   );
 };
 

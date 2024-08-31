@@ -1,4 +1,5 @@
-export const drawerWidth = 280;
+export const drawerWidth = 240;
+export const drawerItemMarginPx = 5;
 
 /**
  *  NUMERO MASSIMO DI CARATTERI PER MESSAGGIO
