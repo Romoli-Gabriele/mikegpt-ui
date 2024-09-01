@@ -5,96 +5,68 @@ import Modal from "@mui/material/Modal";
 import {
   IconButton,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
+  ListItemSecondaryAction,
   ListItemText,
   Stack,
   TextField,
 } from "@mui/material";
 import {
-  Delete,
   FolderOutlined,
   ChevronLeft,
   AddOutlined,
+  WorkspacePremiumOutlined,
+  WorkspacesOutlined,
+  WorkspacePremiumRounded,
+  SpaceDashboardOutlined,
+  DeleteForeverOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { store } from "../store";
 
-const data = [];
+const data = [
+  "Workspace1",
+  "Workspace",
+  "Workspace",
+  "Workspace",
+  "Workspace",
+  "Workspace",
+];
 
-export const ChatModal = ({
-  open,
-  setOpen,
-  title: chatTitle,
-  conversationId,
-}) => {
+export const WorkspaceModal = ({ open, setOpen }) => {
   const theme = useTheme();
   const [screen, setScreen] = React.useState("main");
-  const [folderName, setFolderName] = React.useState("");
+  const [name, setName] = React.useState("");
 
   const handleClose = () => {
     setOpen(false);
     reset();
   };
 
-  const deleteChat = () => {
-    // ELIMINA LA CHAT
-    // TODO: implementare
-
-    // RIMUOVI DALLO STORE
-    store
-      .getActions()
-      .chat.setConversations(
-        store
-          .getState()
-          .chat.conversations.filter((x) => x.conversationId !== conversationId)
-      );
-
-    // CHIUDI IL MODAL
-    handleClose();
-  };
-
-  const createFolder = () => {
-    // CREA LA CARTELLA
-    // TODO: implementare
-    // AGGIUNGI LA CHAT ALLA CARTELLA
-    addToFolder("folderId");
-  };
-
-  const addToFolder = (folderId) => {
-    // AGGIUNGI LA CHAT ALLA CARTELLA
-    // TODO: implementare
-    // CHIUDI IL MODAL
-    handleClose();
-  };
-
-  const openFolderSelection = () => {
-    setScreen("select-folder");
+  const createWorkspace = () => {
+    // CREATE WORKSPACE
+    // TODO: Implement
+    // IMPOSTA COME DEFAULT
+    // TODO: Implement
   };
 
   const reset = () => {
     setScreen("main");
-    setFolderName("");
+    setName("");
   };
 
   const renderTitle = () => {
     let title = "";
     let backButton = screen !== "main";
 
-    if (screen === "main") title = chatTitle || "Untitled chat";
-    else if (screen === "select-folder") title = "Select a folder";
-    else if (screen === "create-folder") title = "Create a folder";
+    if (screen === "main") title = "Workspaces";
+    else if (screen === "create-workspace") title = "New workspace";
 
     return (
-      <Stack
-        direction="row"
-        sx={{
-          mb: 2,
-        }}
-        alignItems="center"
-      >
+      <Stack direction="row" sx={{ mb: 2 }} alignItems="center">
         {backButton && (
           <IconButton>
             <ChevronLeft onClick={reset} />
@@ -111,32 +83,6 @@ export const ChatModal = ({
     if (screen === "main")
       return (
         <>
-          {/** Aggiungi la chat a una cartella */}
-          <Button
-            onClick={openFolderSelection}
-            variant="outlined"
-            color="primary"
-            sx={{ mt: 2, width: "100%" }}
-            startIcon={<FolderOutlined />}
-          >
-            Add to a folder
-          </Button>
-          {/** Elimina la chat */}
-          <Button
-            variant="outlined"
-            color="error"
-            sx={{ mt: 2, width: "100%" }}
-            startIcon={<Delete />}
-            onClick={deleteChat}
-          >
-            Delete chat
-          </Button>
-        </>
-      );
-
-    if (screen === "select-folder")
-      return (
-        <>
           <List
             sx={{
               maxHeight: "200px",
@@ -145,58 +91,64 @@ export const ChatModal = ({
           >
             {data.map((x) => {
               return (
-                <ListItemButton
+                <ListItem
                   key={x}
                   onClick={() => {
                     addToFolder(x.id);
                   }}
-                  sx={{
-                    borderRadius: theme.shape.borderRadius + "px",
-                  }}
                 >
-                  <ListItemIcon>
-                    <FolderOutlined />
-                  </ListItemIcon>
-                  <ListItemText primary="Folder 1" />
-                </ListItemButton>
+                  <ListItemButton
+                    sx={{ borderRadius: theme.shape.borderRadius + "px" }}
+                  >
+                    <ListItemIcon>
+                      <SpaceDashboardOutlined />
+                    </ListItemIcon>
+                    <ListItemText primary="Folder 1" />
+                  </ListItemButton>
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" color="error" aria-label="delete">
+                      <DeleteForeverOutlined />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
               );
             })}
           </List>
 
           {data.length === 0 && (
             <Typography variant="body2" sx={{ mt: 2, mb: 2 }} align="center">
-              You don't have any folders yet
+              You don't have any workspaces yet
             </Typography>
           )}
 
           <Button
-            onClick={() => setScreen("create-folder")}
+            onClick={() => setScreen("create-workspace")}
             variant="outlined"
             color="primary"
             sx={{ mt: 2, width: "100%" }}
             startIcon={<AddOutlined />}
           >
-            New folder
+            Create new workspace
           </Button>
         </>
       );
-    if (screen === "create-folder")
+    if (screen === "create-workspace")
       return (
         <Stack sx={{ pt: 2, pb: 4 }}>
           <TextField
-            value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
-            label="Folder name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            label="Workspace name"
             variant="outlined"
             sx={{ width: "100%", mb: 2 }}
           />
           <Button
-            disabled={folderName.length === 0}
+            disabled={name.length === 0}
             variant="outlined"
             color="primary"
             sx={{ mt: 2, width: "100%" }}
             endIcon={<AddOutlined />}
-            onClick={createFolder}
+            onClick={createWorkspace}
           >
             Create
           </Button>
@@ -222,7 +174,7 @@ export const ChatModal = ({
   );
 };
 
-ChatModal.propTypes = {
+WorkspaceModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
 };

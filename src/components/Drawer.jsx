@@ -19,6 +19,8 @@ import {
   LogoutOutlined,
   Search,
   SettingsOutlined,
+  SpaceDashboard,
+  SpaceDashboardOutlined,
 } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
@@ -27,6 +29,7 @@ import { Avatar, IconButton, Typography, useMediaQuery } from "@mui/material";
 import { useStoreState } from "easy-peasy";
 import { ChatItem } from "./ChatItem.jsx";
 import { useTheme } from "@emotion/react";
+import { WorkspaceModal } from "./WorkspaceModal.jsx";
 
 const BORDER_RADIUS = "17px";
 
@@ -102,6 +105,7 @@ const Drawer = styled(MuiDrawer, {
 export default function MiniDrawer() {
   const [open, setOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [workspaceOpen, setWorkspaceOpen] = React.useState(false);
   const inputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { user, logout } = useAuth();
@@ -249,6 +253,7 @@ export default function MiniDrawer() {
               <ListItemButton
                 sx={styles.listItemButton}
                 onClick={ConversationService.openNewConversation}
+                disabled={!currentConversationId}
               >
                 <ListItemIcon>
                   <Add />
@@ -274,9 +279,14 @@ export default function MiniDrawer() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton sx={styles.listItemButton}>
+              <ListItemButton
+                sx={styles.listItemButton}
+                onClick={() => {
+                  setWorkspaceOpen(true);
+                }}
+              >
                 <ListItemIcon>
-                  <Dashboard fontSize="small" />
+                  <SpaceDashboardOutlined fontSize="small" />
                 </ListItemIcon>
                 <ListItemText
                   primary="Workspace"
@@ -374,6 +384,7 @@ export default function MiniDrawer() {
       </Drawer>
 
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />
+      <WorkspaceModal open={workspaceOpen} setOpen={setWorkspaceOpen} />
     </Box>
   );
 }

@@ -1,4 +1,6 @@
-import { action } from "easy-peasy";
+import { action, thunk } from "easy-peasy";
+
+const CURRENT_WORKSPACE_STORAGE_KEY = "currentWorkspaceId";
 
 export const chatModel = {
   messages: [],
@@ -68,5 +70,20 @@ export const chatModel = {
   workspaces: [],
   setWorkspaces: action((state, payload) => {
     state.workspaces = payload;
+  }),
+
+  currentWorkspaceId: null,
+  setCurrentWorkspaceId: action((state, payload) => {
+    state.currentWorkspaceId = payload;
+  }),
+  loadCurrentWorkspaceId: thunk((state) => {
+    const currentWorkspaceId = localStorage.getItem(
+      CURRENT_WORKSPACE_STORAGE_KEY
+    );
+    state.setCurrentWorkspaceId(currentWorkspaceId);
+  }),
+  saveCurrentWorkspaceId: thunk((state, payload) => {
+    localStorage.setItem(CURRENT_WORKSPACE_STORAGE_KEY, payload);
+    state.setCurrentWorkspaceId(payload);
   }),
 };
