@@ -7,8 +7,10 @@ import { ModeEdit, Delete, CancelOutlined } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import { PoliciesLinks } from "./Footer";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 export const SettingsModal = ({ open, setOpen }) => {
+  const navigate = useNavigate();
   const handleClose = () => setOpen(false);
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
@@ -28,6 +30,9 @@ export const SettingsModal = ({ open, setOpen }) => {
             color="primary"
             sx={{ mt: 2, width: "100%" }}
             startIcon={<ModeEdit />}
+            onClick={() => {
+              navigate("/edit-password");
+            }}
           >
             Change Password
           </Button>
@@ -41,14 +46,14 @@ export const SettingsModal = ({ open, setOpen }) => {
             Cancel Subscription
           </Button>
 
-          <Button
+          {/* <Button
             variant="contained"
             color="error"
             sx={{ mt: 2, width: "100%" }}
             startIcon={<Delete />}
           >
             Delete Account
-          </Button>
+          </Button> */}
           <Divider sx={{ mt: 3, mb: 3 }} />
           <PoliciesLinks />
         </ModalBox>

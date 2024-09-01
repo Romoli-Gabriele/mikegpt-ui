@@ -15,6 +15,7 @@ import awsExports from "./aws-exports.jsx";
 import UploadDocumentPage from "./pages/UploadDocumentPage.jsx";
 import ProductListView from "./components/ProductListView.jsx";
 import { store } from "./store/index.jsx";
+import EditPasswordPage from "./pages/EditPassword.jsx";
 
 Amplify.configure({
   Auth: {
@@ -58,6 +59,7 @@ export const router = createBrowserRouter(
       {/*<Route path="/forgot-password" element={<ForgotPasswordPage />} />*/}
       {/*<Route path="/reset-password" element={<ResetPasswordPage />} />*/}
       <Route path="/products" element={<ProductListView />} />
+      <Route path="/edit-password" element={<EditPasswordPage />} />
       <Route path="/" element={<ProtectedLayout />}>
         <Route path="" element={<ChatPage />} />
         {/*<Route path="upload" element={<UploadDocumentPage />} />*/}
