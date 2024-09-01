@@ -15,23 +15,29 @@ import {
   Add,
   ChevronLeft,
   ChevronRight,
-  Dashboard,
   LogoutOutlined,
   Search,
   SettingsOutlined,
-  SpaceDashboard,
   SpaceDashboardOutlined,
 } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { ConversationService } from "../services/ConversationService.jsx";
-import { Avatar, IconButton, Typography, useMediaQuery } from "@mui/material";
+import {
+  Avatar,
+  IconButton,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useStoreState } from "easy-peasy";
 import { ChatItem } from "./ChatItem.jsx";
 import { useTheme } from "@emotion/react";
 import { WorkspaceModal } from "./WorkspaceModal.jsx";
 
 const BORDER_RADIUS = "17px";
+
+const DRAWER_RIGHT_BORDER = "solid #cccccc 1px";
 
 const styles = {
   listItemButton: {
@@ -61,6 +67,29 @@ const styles = {
   },
   searchSelectionButton: {
     borderRadius: BORDER_RADIUS,
+  },
+  folders: {
+    ml: drawerItemMarginPx + "px",
+    display: "flex",
+    flexDirection: "row",
+    overflowX: "auto",
+    overflowY: "hidden",
+    whiteSpace: "nowrap",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
+  },
+  folder: {
+    display: "block",
+    p: 1,
+    background: "red",
+    mr: 1,
+    borderRadius: "10px",
+
+    "&:hover": {
+      backgroundColor: "var(--background-highlight-color)",
+    },
+    cursor: "pointer",
   },
 };
 
@@ -173,6 +202,44 @@ export default function MiniDrawer() {
     );
   };
 
+  const renderFolders = () => {
+    if (!open) return null;
+
+    const folders = [
+      "folder1",
+      "folder2",
+      "folder3",
+      "folder4",
+      "folder5",
+      "folder6",
+    ];
+
+    if (folders.length === 0) return null;
+
+    return (
+      <List sx={styles.folders}>
+        {["All", ...folders].map((text, index) => {
+          const isSelected = index === 0;
+          return (
+            <ListItem
+              key={text}
+              disablePadding
+              sx={{
+                ...styles.folder,
+                backgroundColor: isSelected
+                  ? "var(--background-highlight-color)"
+                  : "transparent",
+              }}
+              onClick={() => {}}
+            >
+              <Typography fontSize={"small"}>{text}</Typography>
+            </ListItem>
+          );
+        })}
+      </List>
+    );
+  };
+
   const renderChats = () => {
     return (
       <>
@@ -209,12 +276,16 @@ export default function MiniDrawer() {
       <Drawer
         variant="permanent"
         open={open}
-        sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+        sx={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         <Box
           sx={{
-            borderRight: "solid #cccccc 1px",
             flex: 1,
+            borderRight: DRAWER_RIGHT_BORDER,
           }}
         >
           <List>
@@ -326,17 +397,19 @@ export default function MiniDrawer() {
               </ListItemButton>
             </ListItem>
           </List>
+          {renderFolders()}
         </Box>
         <Box
           sx={{
             overflowY: "auto",
             overflowX: "hidden",
+            borderRight: DRAWER_RIGHT_BORDER,
           }}
         >
           {open && <List>{renderChats()}</List>}
         </Box>
 
-        <div>
+        <Box sx={{ borderRight: DRAWER_RIGHT_BORDER }}>
           <ListItem
             sx={{
               marginTop: "auto",
@@ -376,11 +449,13 @@ export default function MiniDrawer() {
             )}
           </ListItem>
           {!open && (
-            <IconButton edge="end" onClick={handleSignOut}>
-              <LogoutOutlined color="primary" />
-            </IconButton>
+            <Stack>
+              <IconButton edge="end" onClick={handleSignOut}>
+                <LogoutOutlined color="primary" />
+              </IconButton>
+            </Stack>
           )}
-        </div>
+        </Box>
       </Drawer>
 
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />

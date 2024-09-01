@@ -16,6 +16,7 @@ import {
   FolderOutlined,
   ChevronLeft,
   AddOutlined,
+  RemoveOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
@@ -33,6 +34,10 @@ export const ChatModal = ({
   const theme = useTheme();
   const [screen, setScreen] = React.useState("main");
   const [folderName, setFolderName] = React.useState("");
+
+  const folder = {
+    name: "TEST",
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -112,15 +117,27 @@ export const ChatModal = ({
       return (
         <>
           {/** Aggiungi la chat a una cartella */}
-          <Button
-            onClick={openFolderSelection}
-            variant="outlined"
-            color="primary"
-            sx={{ mt: 2, width: "100%" }}
-            startIcon={<FolderOutlined />}
-          >
-            Add to a folder
-          </Button>
+          {folder ? (
+            <Button
+              onClick={openFolderSelection}
+              variant="outlined"
+              color="warning"
+              sx={{ mt: 2, width: "100%" }}
+              startIcon={<RemoveOutlined />}
+            >
+              Remove from folder {folder.name}
+            </Button>
+          ) : (
+            <Button
+              onClick={openFolderSelection}
+              variant="outlined"
+              color="primary"
+              sx={{ mt: 2, width: "100%" }}
+              startIcon={<FolderOutlined />}
+            >
+              Add to a folder
+            </Button>
+          )}
           {/** Elimina la chat */}
           <Button
             variant="outlined"

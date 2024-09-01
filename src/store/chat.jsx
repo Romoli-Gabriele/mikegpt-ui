@@ -86,4 +86,9 @@ export const chatModel = {
     localStorage.setItem(CURRENT_WORKSPACE_STORAGE_KEY, payload);
     state.setCurrentWorkspaceId(payload);
   }),
+
+  selectedFolderId: null,
+  setSelectedFolderId: action((state, payload) => {
+    state.selectedFolderId = payload;
+  }),
 };

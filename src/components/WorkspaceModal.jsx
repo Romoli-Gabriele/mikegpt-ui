@@ -14,18 +14,16 @@ import {
   TextField,
 } from "@mui/material";
 import {
-  FolderOutlined,
   ChevronLeft,
   AddOutlined,
-  WorkspacePremiumOutlined,
-  WorkspacesOutlined,
-  WorkspacePremiumRounded,
   SpaceDashboardOutlined,
   DeleteForeverOutlined,
+  FolderOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
+import { store } from "../store";
 
 const data = [
   "Workspace1",
@@ -40,6 +38,7 @@ export const WorkspaceModal = ({ open, setOpen }) => {
   const theme = useTheme();
   const [screen, setScreen] = React.useState("main");
   const [name, setName] = React.useState("");
+  const [selectedWorkspace, setSelectedWorkspace] = React.useState(undefined);
 
   const handleClose = () => {
     setOpen(false);
@@ -51,6 +50,8 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     // TODO: Implement
     // IMPOSTA COME DEFAULT
     // TODO: Implement
+
+    store.getActions().chat.setSelectedFolderId(undefined);
   };
 
   const reset = () => {
@@ -64,6 +65,7 @@ export const WorkspaceModal = ({ open, setOpen }) => {
 
     if (screen === "main") title = "Workspaces";
     else if (screen === "create-workspace") title = "New workspace";
+    else if (screen === "selected-workspace") title = "Selected workspace";
 
     return (
       <Stack direction="row" sx={{ mb: 2 }} alignItems="center">
@@ -94,7 +96,8 @@ export const WorkspaceModal = ({ open, setOpen }) => {
                 <ListItem
                   key={x}
                   onClick={() => {
-                    addToFolder(x.id);
+                    setScreen("selected-workspace");
+                    setSelectedWorkspace(x);
                   }}
                 >
                   <ListItemButton
@@ -105,11 +108,6 @@ export const WorkspaceModal = ({ open, setOpen }) => {
                     </ListItemIcon>
                     <ListItemText primary="Folder 1" />
                   </ListItemButton>
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" color="error" aria-label="delete">
-                      <DeleteForeverOutlined />
-                    </IconButton>
-                  </ListItemSecondaryAction>
                 </ListItem>
               );
             })}
@@ -151,6 +149,46 @@ export const WorkspaceModal = ({ open, setOpen }) => {
             onClick={createWorkspace}
           >
             Create
+          </Button>
+        </Stack>
+      );
+    else if (screen === "selected-workspace")
+      return (
+        <Stack>
+          <List
+            sx={{
+              maxHeight: "200px",
+              overflowY: "auto",
+            }}
+          >
+            {["folder1", "folder2"].map((x) => {
+              return (
+                <ListItem key={x}>
+                  <ListItemIcon>
+                    <FolderOutlined />
+                  </ListItemIcon>
+                  <ListItemText primary={x} />
+                  <IconButton>
+                    <DeleteForeverOutlined color="error" />
+                  </IconButton>
+                </ListItem>
+              );
+            })}
+          </List>
+          <Button
+            variant="outlined"
+            color="primary"
+            sx={{ mt: 2, width: "100%" }}
+          >
+            Utilizza workspace
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            sx={{ mt: 2, width: "100%" }}
+            endIcon={<DeleteForeverOutlined />}
+          >
+            Elimina workspace
           </Button>
         </Stack>
       );
