@@ -202,8 +202,17 @@ export default function MiniDrawer() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Drawer variant="permanent" open={open}>
-        <Box sx={{ borderRight: "solid #cccccc 1px", height: "100%" }}>
+      <Drawer
+        variant="permanent"
+        open={open}
+        sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        <Box
+          sx={{
+            borderRight: "solid #cccccc 1px",
+            flex: 1,
+          }}
+        >
           <List>
             <ListItem disablePadding={true} sx={{ display: "block" }}>
               <Box
@@ -307,52 +316,61 @@ export default function MiniDrawer() {
               </ListItemButton>
             </ListItem>
           </List>
+        </Box>
+        <Box
+          sx={{
+            overflowY: "auto",
+            overflowX: "hidden",
+          }}
+        >
           {open && <List>{renderChats()}</List>}
         </Box>
 
-        <ListItem
-          sx={{
-            marginTop: "auto",
-            justifyContent: open ? "flex-start" : "center",
-            flexDirection: "row",
-          }}
-        >
-          <Avatar
-            alt={`${user.given_name ?? ""} ${user.family_name}`}
+        <div>
+          <ListItem
             sx={{
-              color: theme.palette.primary.contrastText,
-              backgroundColor: theme.palette.primary.main,
+              marginTop: "auto",
+              justifyContent: open ? "flex-start" : "center",
+              flexDirection: "row",
             }}
           >
-            {user.given_name?.charAt(0) ?? ""}
-          </Avatar>
-
-          {open && (
-            <Typography
-              variant={md ? "subtitle2" : "subtitle1"}
-              color={"primary"}
-              noWrap
+            <Avatar
+              alt={`${user.given_name ?? ""} ${user.family_name}`}
               sx={{
-                mr: { sm: 0.3, md: 1 },
-                ml: { sm: 0.3, md: 1 },
-                mb: 0,
+                color: theme.palette.primary.contrastText,
+                backgroundColor: theme.palette.primary.main,
               }}
             >
-              {user.given_name ?? ""} {user.family_name ?? ""}
-            </Typography>
-          )}
+              {user.given_name?.charAt(0) ?? ""}
+            </Avatar>
 
-          {open && (
+            {open && (
+              <Typography
+                variant={md ? "subtitle2" : "subtitle1"}
+                color={"primary"}
+                noWrap
+                sx={{
+                  mr: { sm: 0.3, md: 1 },
+                  ml: { sm: 0.3, md: 1 },
+                  mb: 0,
+                }}
+              >
+                {user.given_name ?? ""} {user.family_name ?? ""}
+              </Typography>
+            )}
+
+            {open && (
+              <IconButton edge="end" onClick={handleSignOut}>
+                <LogoutOutlined color="primary" />
+              </IconButton>
+            )}
+          </ListItem>
+          {!open && (
             <IconButton edge="end" onClick={handleSignOut}>
               <LogoutOutlined color="primary" />
             </IconButton>
           )}
-        </ListItem>
-        {!open && (
-          <IconButton edge="end" onClick={handleSignOut}>
-            <LogoutOutlined color="primary" />
-          </IconButton>
-        )}
+        </div>
       </Drawer>
 
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />

@@ -62,9 +62,9 @@ const ChatPage = () => {
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const isMd = useMediaQuery(theme.breakpoints.down("md"));
 
-  useEffect(() => {
-    ConversationService.sendMessage("", "").then();
-  }, [conversationId]);
+  // useEffect(() => {
+  //   ConversationService.sendMessage("", "").then();
+  // }, [conversationId]);
 
   const createConversation = async () => {
     setLoading(true);

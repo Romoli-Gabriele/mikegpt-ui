@@ -77,6 +77,23 @@ const fetchConversationById = async (conversationId) => {
   };
 };
 
+const fetchAllConversations = async () => {
+  try {
+    console.log("fetchAllConversations");
+    const res = await lambdaClient.get("/list_chat_sessions");
+    if (!res?.data?.conversations)
+      throw new Error("Failed to fetch conversations");
+
+    console.log("fetchAllConversations", res.data);
+    const actions = store.getActions();
+    actions.chat.setConversations(res.data.conversations);
+  } catch (error) {
+    console.error("fetchAllConversations", error);
+  }
+};
+
+fetchAllConversations();
+
 const openConversation = async (conversationId) => {
   try {
     store.getActions().chat.setConversationId(conversationId);

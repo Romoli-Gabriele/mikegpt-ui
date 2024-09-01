@@ -51,6 +51,15 @@ export const chatModel = {
         return d;
       })(),
     },
+    ...new Array(100).fill(null).map((_, i) => ({
+      conversationId: `${i + 5}`,
+      title: `Fake ${i + 5}`,
+      date: (function () {
+        const d = new Date();
+        d.setDate(new Date().getDate() - i - 5);
+        return d;
+      })(),
+    })),
   ],
   setConversations: action((state, payload) => {
     state.conversations = payload;
