@@ -29,13 +29,24 @@ const getConversation = async (conversationId) => {
   return await lambdaClient.get(`/conversation/${conversationId}`);
 };
 
+const queryHealth = async () => {
+  try {
+    console.log("queryHealth");
+    const x = await apiClient.get(`/health`);
+    console.log("queryHealth", { x });
+  } catch (error) {
+    console.error("queryHealth", error);
+  }
+};
+queryHealth();
+
 const sendMessage = async (
   conversationId,
   message,
   kwargs = {},
   debugAB = null
 ) => {
-  return await apiClient.post(`/`, {
+  return await apiClient.post(`/query`, {
     question: message,
     kwargs: kwargs,
     conversationid: conversationId,
@@ -92,7 +103,7 @@ const fetchAllConversations = async () => {
   }
 };
 
-fetchAllConversations();
+//fetchAllConversations();
 
 const openConversation = async (conversationId) => {
   try {
