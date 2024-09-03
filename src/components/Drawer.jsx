@@ -273,143 +273,122 @@ export default function MiniDrawer() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Drawer
-        variant="permanent"
-        open={open}
-        sx={{
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box
-          sx={{
-            flex: 1,
-            borderRight: DRAWER_RIGHT_BORDER,
-          }}
-        >
-          <List>
-            <ListItem disablePadding={true} sx={{ display: "block" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <img
-                  src={ico}
-                  alt="ico"
-                  style={{
-                    width: "3rem",
+      <Drawer variant="permanent" open={open}>
+        <Stack sx={{ height: "100vh", borderRight: DRAWER_RIGHT_BORDER }}>
+          <Box sx={{ overflowY: "auto" }}>
+            <List>
+              <ListItem disablePadding={true} sx={{ display: "block" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                />
-              </Box>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={styles.listItemButton}
-                onClick={handleOpenClose}
-              >
-                <ListItemIcon>
-                  {open ? <ChevronLeft /> : <ChevronRight />}
-                </ListItemIcon>
-                <ListItemText
-                  primary="Close"
-                  primaryTypographyProps={styles.itemLabelTypographyProps}
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={styles.listItemButton}
-                onClick={ConversationService.openNewConversation}
-                disabled={!currentConversationId}
-              >
-                <ListItemIcon>
-                  <Add />
-                </ListItemIcon>
-                <ListItemText
-                  primary="New Chat"
-                  primaryTypographyProps={styles.itemLabelTypographyProps}
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={styles.listItemButton}
-                onClick={handleSettingsOpen}
-              >
-                <ListItemIcon>
-                  <SettingsOutlined fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Settings"
-                  primaryTypographyProps={styles.itemLabelTypographyProps}
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={styles.listItemButton}
-                onClick={() => {
-                  setWorkspaceOpen(true);
-                }}
-              >
-                <ListItemIcon>
-                  <SpaceDashboardOutlined fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Workspace"
-                  primaryTypographyProps={styles.itemLabelTypographyProps}
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  ...styles.listItemButton,
-                  backgroundColor: "#F5F5F5",
-                  display: "flex",
-                }}
-                onClick={() => {
-                  setOpen(true);
-                  inputRef.current?.focus();
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.cursor = "text";
-                }}
-              >
-                <ListItemIcon>
-                  <Search />
-                </ListItemIcon>
-                <input
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className="search-input"
-                  ref={inputRef}
-                  placeholder="Search"
-                  style={{
-                    ...styles.searchInput,
-                    fontSize: styles.itemLabelTypographyProps.fontSize,
+                >
+                  <img
+                    src={ico}
+                    alt="ico"
+                    style={{
+                      width: "3rem",
+                    }}
+                  />
+                </Box>
+              </ListItem>
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={styles.listItemButton}
+                  onClick={handleOpenClose}
+                >
+                  <ListItemIcon>
+                    {open ? <ChevronLeft /> : <ChevronRight />}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Close"
+                    primaryTypographyProps={styles.itemLabelTypographyProps}
+                  />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={styles.listItemButton}
+                  onClick={ConversationService.openNewConversation}
+                  disabled={!currentConversationId}
+                >
+                  <ListItemIcon>
+                    <Add />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="New Chat"
+                    primaryTypographyProps={styles.itemLabelTypographyProps}
+                  />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={styles.listItemButton}
+                  onClick={handleSettingsOpen}
+                >
+                  <ListItemIcon>
+                    <SettingsOutlined fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Settings"
+                    primaryTypographyProps={styles.itemLabelTypographyProps}
+                  />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={styles.listItemButton}
+                  onClick={() => {
+                    setWorkspaceOpen(true);
                   }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          {renderFolders()}
-        </Box>
-        <Box
-          sx={{
-            overflowY: "auto",
-            overflowX: "hidden",
-            borderRight: DRAWER_RIGHT_BORDER,
-          }}
-        >
-          {open && <List>{renderChats()}</List>}
-        </Box>
+                >
+                  <ListItemIcon>
+                    <SpaceDashboardOutlined fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Workspace"
+                    primaryTypographyProps={styles.itemLabelTypographyProps}
+                  />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={{
+                    ...styles.listItemButton,
+                    backgroundColor: "#F5F5F5",
+                    display: "flex",
+                  }}
+                  onClick={() => {
+                    setOpen(true);
+                    inputRef.current?.focus();
+                  }}
+                  onMouseEnter={(event) => {
+                    event.currentTarget.style.cursor = "text";
+                  }}
+                >
+                  <ListItemIcon>
+                    <Search />
+                  </ListItemIcon>
+                  <input
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="search-input"
+                    ref={inputRef}
+                    placeholder="Search"
+                    style={{
+                      ...styles.searchInput,
+                      fontSize: styles.itemLabelTypographyProps.fontSize,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            {renderFolders()}
+            {open && <List>{renderChats()}</List>}
+          </Box>
 
-        <Box sx={{ borderRight: DRAWER_RIGHT_BORDER }}>
           <ListItem
             sx={{
               marginTop: "auto",
@@ -455,7 +434,7 @@ export default function MiniDrawer() {
               </IconButton>
             </Stack>
           )}
-        </Box>
+        </Stack>
       </Drawer>
 
       <SettingsModal open={settingsOpen} setOpen={setSettingsOpen} />
