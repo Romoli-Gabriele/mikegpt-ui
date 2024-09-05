@@ -135,8 +135,10 @@ const ChatPage = () => {
         // Controlla se l'utente è ancora nella chat che ha inviato il messaggio e questa non è cambiata
         // Se no c'è il bug che se invio un messaggio e subito dopo prima della risposta  cambio chat
         // La risposta arriva nella chat sbagliata e si porta tutti i vecchi messaggi
-
-        if (current_conversation_id == conversationId || !conversationId) {
+        if (
+          String(current_conversation_id) === String(conversationId) ||
+          !conversationId
+        ) {
           const responseMessage = {
             data: {
               content: res.data["response"],
@@ -152,6 +154,7 @@ const ChatPage = () => {
         // skip
         // delete last message
         setMessages(_messages.slice(0, -1));
+        console.error(e);
       }
     } catch (e) {
       console.log(e);

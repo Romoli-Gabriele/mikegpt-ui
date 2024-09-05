@@ -7,6 +7,8 @@ const createConversation = async () => {
   if (!res?.data?.conversationid)
     throw new Error("Failed to create conversation");
 
+  console.log("created new conversation", res.data);
+
   const actions = store.getActions();
 
   // Aggiunge la nuova conversazione in cima alla lista
@@ -31,9 +33,8 @@ const getConversation = async (conversationId) => {
 
 const queryHealth = async () => {
   try {
-    console.log("queryHealth");
     const x = await apiClient.get(`/health`);
-    console.log("queryHealth", { x });
+    console.log("Health:", x.data.message);
   } catch (error) {
     console.error("queryHealth", error);
   }
@@ -46,12 +47,17 @@ const sendMessage = async (
   kwargs = {},
   debugAB = null
 ) => {
-  return await apiClient.post(`/query`, {
-    question: message,
-    kwargs: kwargs,
-    conversationid: conversationId,
-    ...(debugAB ? { debugAB: debugAB } : {}),
-  });
+  try {
+    const data = await apiClient.post(`/query`, {
+      question: message,
+      //   kwargs: kwargs,
+      conversationid: conversationId,
+      ...(debugAB ? { debugAB: debugAB } : {}),
+    });
+    return data.data;
+  } catch (error) {
+    console.error("sendMessage", error);
+  }
 };
 
 const sendFeedback = async (runid, feedback) => {
