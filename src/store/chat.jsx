@@ -67,11 +67,6 @@ export const chatModel = {
     state.conversations = payload;
   }),
 
-  workspaces: [],
-  setWorkspaces: action((state, payload) => {
-    state.workspaces = payload;
-  }),
-
   currentWorkspaceId: null,
   setCurrentWorkspaceId: action((state, payload) => {
     state.currentWorkspaceId = payload;
@@ -90,5 +85,14 @@ export const chatModel = {
   selectedFolderId: null,
   setSelectedFolderId: action((state, payload) => {
     state.selectedFolderId = payload;
+  }),
+
+  workspaces: [],
+  setWorkspaces: action((state, payload) => {
+    state.workspaces = payload;
+  }),
+  workspaceLoaded: false,
+  setWorkspaceLoaded: action((state, payload) => {
+    state.workspaceLoaded = payload;
   }),
 };

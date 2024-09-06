@@ -8,7 +8,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
+  CircularProgress,
   ListItemText,
   Stack,
   TextField,
@@ -23,40 +23,88 @@ import {
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
+import { WorkspaceService } from "../services/WorkspaceService";
+import { useStoreState, useStoreActions } from "easy-peasy";
+import { useSnackbar } from "notistack";
 import { store } from "../store";
-
-const data = [
-  "Workspace1",
-  "Workspace",
-  "Workspace",
-  "Workspace",
-  "Workspace",
-  "Workspace",
-];
 
 export const WorkspaceModal = ({ open, setOpen }) => {
   const theme = useTheme();
   const [screen, setScreen] = React.useState("main");
   const [name, setName] = React.useState("");
   const [selectedWorkspace, setSelectedWorkspace] = React.useState(undefined);
+  const { enqueueSnackbar } = useSnackbar();
+  const workspaces = useStoreState((s) => s.chat.workspaces);
+  const workspaceLoaded = useStoreState((s) => s.chat.workspaceLoaded);
+  const saveCurrentWorkspaceId = useStoreActions(
+    (s) => s.chat.saveCurrentWorkspaceId
+  );
+  const currentWorkspaceId = useStoreState((s) => s.chat.currentWorkspaceId);
+  const setWorkspaces = useStoreActions((s) => s.chat.setWorkspaces);
+
+  const sortedWorkspaces = React.useMemo(() => {
+    if (!currentWorkspaceId) return workspaces;
+    if (!workspaces || workspaces?.length === 0) return [];
+    else {
+      const currentWorkspace = workspaces.find(
+        (x) => x.id === currentWorkspaceId
+      );
+      if (!currentWorkspace) return workspaces;
+      const otherWorkspaces = workspaces.filter(
+        (x) => x.id !== currentWorkspaceId
+      );
+      return [currentWorkspace, ...otherWorkspaces];
+    }
+  }, [workspaces, currentWorkspaceId]);
+
+  const canDelete = React.useMemo(() => {
+    if (!workspaceLoaded) return false;
+    if (workspaces.length === 0) return false;
+    else return true;
+  }, [workspaces, workspaceLoaded]);
 
   const handleClose = () => {
     setOpen(false);
     reset();
   };
 
-  const createWorkspace = () => {
-    // CREATE WORKSPACE
-    // TODO: Implement
-    // IMPOSTA COME DEFAULT
-    // TODO: Implement
-
-    store.getActions().chat.setSelectedFolderId(undefined);
+  const deleteWorkspace = async (workspaceId) => {
+    try {
+      await WorkspaceService.deleteWorkspace(workspaceId);
+      enqueueSnackbar("Workspace deleted", { variant: "success" });
+      reset();
+    } catch (e) {
+      enqueueSnackbar("Error deleting workspace", { variant: "error" });
+    }
   };
 
+  const deleteFolder = (folderId) => async () => {
+    try {
+      await WorkspaceService.deleteFolder(folderId, selectedWorkspace.id);
+      enqueueSnackbar("Folder deleted", { variant: "success" });
+    } catch (e) {
+      enqueueSnackbar("Error deleting folder", { variant: "error" });
+    }
+  };
+
+  const createWorkspace = async () => {
+    try {
+      await WorkspaceService.createWorkspace(name);
+      handleClose();
+      enqueueSnackbar("Workspace created", { variant: "success" });
+    } catch (e) {
+      enqueueSnackbar("Error creating workspace", { variant: "error" });
+      console.error(e);
+    }
+  };
+
+  /**
+   * Resetta il form
+   */
   const reset = () => {
-    setScreen("main");
     setName("");
+    setSelectedWorkspace(undefined);
+    setScreen("main");
   };
 
   const renderTitle = () => {
@@ -65,7 +113,8 @@ export const WorkspaceModal = ({ open, setOpen }) => {
 
     if (screen === "main") title = "Workspaces";
     else if (screen === "create-workspace") title = "New workspace";
-    else if (screen === "selected-workspace") title = "Selected workspace";
+    else if (screen === "selected-workspace")
+      title = selectedWorkspace?.name || "Unnamed Workspace";
 
     return (
       <Stack direction="row" sx={{ mb: 2 }} alignItems="center">
@@ -91,10 +140,21 @@ export const WorkspaceModal = ({ open, setOpen }) => {
               overflowY: "auto",
             }}
           >
-            {data.map((x) => {
+            {workspaces.length === 0 && !workspaceLoaded && (
+              <CircularProgress
+                size="1.5rem"
+                sx={{
+                  display: "block",
+                  margin: "auto",
+                  mt: 2,
+                  mb: 2,
+                }}
+              />
+            )}
+            {sortedWorkspaces.map((x) => {
               return (
                 <ListItem
-                  key={x}
+                  key={x.id + ""}
                   onClick={() => {
                     setScreen("selected-workspace");
                     setSelectedWorkspace(x);
@@ -106,14 +166,14 @@ export const WorkspaceModal = ({ open, setOpen }) => {
                     <ListItemIcon>
                       <SpaceDashboardOutlined />
                     </ListItemIcon>
-                    <ListItemText primary="Folder 1" />
+                    <ListItemText primary={x?.name} />
                   </ListItemButton>
                 </ListItem>
               );
             })}
           </List>
 
-          {data.length === 0 && (
+          {workspaceLoaded && workspaces.length === 0 && (
             <Typography variant="body2" sx={{ mt: 2, mb: 2 }} align="center">
               You don't have any workspaces yet
             </Typography>
@@ -161,14 +221,14 @@ export const WorkspaceModal = ({ open, setOpen }) => {
               overflowY: "auto",
             }}
           >
-            {["folder1", "folder2"].map((x) => {
+            {selectedWorkspace.folders?.map((x) => {
               return (
-                <ListItem key={x}>
+                <ListItem key={x?.id + ""}>
                   <ListItemIcon>
                     <FolderOutlined />
                   </ListItemIcon>
-                  <ListItemText primary={x} />
-                  <IconButton>
+                  <ListItemText primary={x?.name || "Unnamed Folder"} />
+                  <IconButton onClick={deleteFolder(x.id)}>
                     <DeleteForeverOutlined color="error" />
                   </IconButton>
                 </ListItem>
@@ -179,17 +239,24 @@ export const WorkspaceModal = ({ open, setOpen }) => {
             variant="outlined"
             color="primary"
             sx={{ mt: 2, width: "100%" }}
+            onClick={() => {
+              saveCurrentWorkspaceId(selectedWorkspace.id);
+              handleClose();
+            }}
           >
-            Utilizza workspace
+            Use workspace
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            sx={{ mt: 2, width: "100%" }}
-            endIcon={<DeleteForeverOutlined />}
-          >
-            Elimina workspace
-          </Button>
+          {canDelete && (
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ mt: 2, width: "100%" }}
+              endIcon={<DeleteForeverOutlined />}
+              onClick={() => deleteWorkspace(selectedWorkspace.id)}
+            >
+              Delete workspace
+            </Button>
+          )}
         </Stack>
       );
     else return null;

@@ -11,6 +11,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ico from "../assets/mike_logo.png";
 import { drawerWidth, drawerItemMarginPx } from "../config.jsx";
 import { SettingsModal } from "./SettingsModal.jsx";
+import { WorkspaceService } from "../services/WorkspaceService.jsx";
 import {
   Add,
   ChevronLeft,

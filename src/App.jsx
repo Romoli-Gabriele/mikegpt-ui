@@ -16,6 +16,7 @@ import UploadDocumentPage from "./pages/UploadDocumentPage.jsx";
 import ProductListView from "./components/ProductListView.jsx";
 import { store } from "./store/index.jsx";
 import EditPasswordPage from "./pages/EditPassword.jsx";
+import { StartupService } from "./services/StartupService.jsx";
 
 Amplify.configure({
   Auth: {
@@ -37,9 +38,7 @@ const getUserData = () =>
   new Promise((resolve, reject) => {
     try {
       AuthService.getAuthenticatedUser().then((user) => {
-        // Carica le workspace salvate in memoria
-        store.getActions().chat.loadCurrentWorkspaceId();
-
+        StartupService.postAuthFlow(user);
         resolve(user);
       });
     } catch (error) {
