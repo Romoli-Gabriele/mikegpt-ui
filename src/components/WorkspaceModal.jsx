@@ -12,6 +12,7 @@ import {
   ListItemText,
   Stack,
   TextField,
+  Box,
 } from "@mui/material";
 import {
   ChevronLeft,
@@ -19,6 +20,7 @@ import {
   SpaceDashboardOutlined,
   DeleteForeverOutlined,
   FolderOutlined,
+  EditOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
@@ -40,7 +42,6 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     (s) => s.chat.saveCurrentWorkspaceId
   );
   const currentWorkspaceId = useStoreState((s) => s.chat.currentWorkspaceId);
-  const setWorkspaces = useStoreActions((s) => s.chat.setWorkspaces);
 
   const sortedWorkspaces = React.useMemo(() => {
     if (!currentWorkspaceId) return workspaces;
@@ -68,6 +69,25 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     reset();
   };
 
+  const handleWorkspaceRenameButtonClick = async () => {
+    try {
+      let newName = prompt("Enter new workspace name", selectedWorkspace.name);
+      newName = newName?.trim();
+      if (!newName || newName.length === 0) {
+        enqueueSnackbar("Name cannot be empty", { variant: "error" });
+        return;
+      }
+      const updatedWorkspace = await WorkspaceService.renameWorkspace(
+        selectedWorkspace.id,
+        newName
+      );
+      setSelectedWorkspace(updatedWorkspace);
+      enqueueSnackbar("Workspace renamed", { variant: "success" });
+    } catch (e) {
+      enqueueSnackbar("Error renaming workspace", { variant: "error" });
+    }
+  };
+
   const deleteWorkspace = async (workspaceId) => {
     try {
       await WorkspaceService.deleteWorkspace(workspaceId);
@@ -78,9 +98,36 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     }
   };
 
+  const renameFolder = (folderId, oldName) => async () => {
+    try {
+      let newName = prompt("Enter new folder name", oldName);
+      newName = newName?.trim();
+      if (!newName || newName.length === 0) {
+        enqueueSnackbar("Name cannot be empty", { variant: "error" });
+        return;
+      }
+
+      const updatedWorkspace = await WorkspaceService.renameFolder(
+        selectedWorkspace.id,
+        folderId,
+        newName
+      );
+      if (!updatedWorkspace) throw new Error("Error renaming folder");
+      setSelectedWorkspace(updatedWorkspace);
+      enqueueSnackbar("Folder renamed", { variant: "success" });
+    } catch (e) {
+      enqueueSnackbar("Error renaming folder", { variant: "error" });
+    }
+  };
+
   const deleteFolder = (folderId) => async () => {
     try {
-      await WorkspaceService.deleteFolder(folderId, selectedWorkspace.id);
+      const updatedWorkspace = await WorkspaceService.deleteFolder(
+        folderId,
+        selectedWorkspace.id
+      );
+      if (!updatedWorkspace) throw new Error("Error deleting folder");
+      setSelectedWorkspace(updatedWorkspace);
       enqueueSnackbar("Folder deleted", { variant: "success" });
     } catch (e) {
       enqueueSnackbar("Error deleting folder", { variant: "error" });
@@ -123,9 +170,21 @@ export const WorkspaceModal = ({ open, setOpen }) => {
             <ChevronLeft onClick={reset} />
           </IconButton>
         )}
-        <Typography id="modal-modal-title" variant="h5" component="h1">
-          {title}
-        </Typography>
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h5" component="h1">
+            {title}
+          </Typography>
+        </Box>
+        {screen === "selected-workspace" && (
+          <IconButton onClick={handleWorkspaceRenameButtonClick}>
+            <EditOutlined color="action" />
+          </IconButton>
+        )}
       </Stack>
     );
   };
@@ -221,15 +280,18 @@ export const WorkspaceModal = ({ open, setOpen }) => {
               overflowY: "auto",
             }}
           >
-            {selectedWorkspace.folders?.map((x) => {
+            {selectedWorkspace?.folders?.map((x) => {
               return (
                 <ListItem key={x?.id + ""}>
                   <ListItemIcon>
                     <FolderOutlined />
                   </ListItemIcon>
                   <ListItemText primary={x?.name || "Unnamed Folder"} />
+                  <IconButton onClick={renameFolder(x.id, x.name)}>
+                    <EditOutlined color="action" />
+                  </IconButton>
                   <IconButton onClick={deleteFolder(x.id)}>
-                    <DeleteForeverOutlined color="error" />
+                    <DeleteForeverOutlined color="action" />
                   </IconButton>
                 </ListItem>
               );

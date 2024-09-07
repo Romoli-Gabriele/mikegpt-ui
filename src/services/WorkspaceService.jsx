@@ -21,7 +21,7 @@ const createFolderAPI = async (workspaceId, name = "Unnamed folder") => {
   }
 };
 
-export const renameFolder = async (folderId, name) => {
+export const renameFolderAPI = async (folderId, name) => {
   try {
     const res = await apiClient.post(`/rename_folder`, { name, folderId });
     return res.status === 200;
@@ -31,7 +31,7 @@ export const renameFolder = async (folderId, name) => {
   }
 };
 
-export const renameWorkspace = async (workspaceId, name) => {
+export const renameWorkspaceAPI = async (workspaceId, name) => {
   try {
     const res = await apiClient.post(`/rename_workspace`, {
       name,
@@ -42,6 +42,51 @@ export const renameWorkspace = async (workspaceId, name) => {
     console.error("renameWorkspace", error);
     return false;
   }
+};
+
+const renameWorkspace = async (workspaceId, name) => {
+  const res = await renameWorkspaceAPI(workspaceId, name);
+
+  if (!res) throw new Error("Error renaming workspace");
+
+  // MODIFICA LO STORE
+  const actions = store.getActions();
+  const workspaces = store.getState().chat.workspaces;
+  let updatedWorkspace = workspaces.find(
+    (x) => String(x.id) === String(workspaceId)
+  );
+  updatedWorkspace = { ...updatedWorkspace, name };
+
+  actions.chat.setWorkspaces([
+    ...workspaces.filter((x) => String(x.id) !== String(workspaceId)),
+    updatedWorkspace,
+  ]);
+
+  return updatedWorkspace;
+};
+
+const renameFolder = async (workspaceId, folderId, name) => {
+  const res = await renameFolderAPI(folderId, name);
+
+  if (!res) throw new Error("Error renaming folder");
+
+  // MODIFICA LO STORE
+  const actions = store.getActions();
+  const workspaces = store.getState().chat.workspaces;
+  let updatedWorkspace = workspaces.find(
+    (x) => String(x.id) === String(workspaceId)
+  );
+  const updatedFolders = updatedWorkspace?.folders?.map((x) =>
+    String(x.id) === String(folderId) ? { ...x, name } : x
+  );
+  updatedWorkspace = { ...updatedWorkspace, folders: updatedFolders };
+
+  actions.chat.setWorkspaces([
+    ...workspaces.filter((x) => String(x.id) !== String(workspaceId)),
+    updatedWorkspace,
+  ]);
+
+  return updatedWorkspace;
 };
 
 const getWorkspacesDetails = async () => {
@@ -139,13 +184,14 @@ const deleteFolder = async (folderId, workspaceId) => {
     ...workspaces.filter((x) => x.id !== workspaceId),
     updatedWorkspace,
   ]);
+  return updatedWorkspace;
 };
 
 export const WorkspaceService = {
   createWorkspace,
   createFolder: createFolderAPI,
-  renameWorkspaceAPI: renameWorkspace,
-  renameFolderAPI: renameFolder,
+  renameWorkspace,
+  renameFolder,
   getWorkspacesDetails,
   deleteFolder,
   deleteWorkspace,

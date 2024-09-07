@@ -35,6 +35,7 @@ import { useStoreState } from "easy-peasy";
 import { ChatItem } from "./ChatItem.jsx";
 import { useTheme } from "@emotion/react";
 import { WorkspaceModal } from "./WorkspaceModal.jsx";
+import { useMemo } from "react";
 
 const BORDER_RADIUS = "17px";
 
@@ -82,7 +83,7 @@ const styles = {
   },
   folder: {
     display: "block",
-    p: 1,
+    p: 0.5,
     background: "red",
     mr: 1,
     borderRadius: "10px",
@@ -143,6 +144,11 @@ export default function MiniDrawer() {
     (state) => state.chat.conversationId
   );
   const conversations = useStoreState((state) => state.chat.conversations);
+  const workspaces = useStoreState((state) => state.chat.workspaces);
+  const workspaceLoaded = useStoreState((state) => state.chat.workspaceLoaded);
+  const currentWorkspaceId = useStoreState(
+    (state) => state.chat.currentWorkspaceId
+  );
 
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down("sm"));
@@ -151,6 +157,13 @@ export default function MiniDrawer() {
   const handleSignOut = () => {
     logout().then();
   };
+
+  const shownFolders = useMemo(() => {
+    const currentWorkspace = workspaces?.find(
+      (workspace) => String(workspace.id) === String(currentWorkspaceId)
+    );
+    return currentWorkspace?.folders || [];
+  }, [workspaces, currentWorkspaceId]);
 
   const chats = React.useMemo(() => {
     let filteredConversations = [...conversations].filter(
@@ -206,24 +219,24 @@ export default function MiniDrawer() {
   const renderFolders = () => {
     if (!open) return null;
 
-    const folders = [
-      "folder1",
-      "folder2",
-      "folder3",
-      "folder4",
-      "folder5",
-      "folder6",
-    ];
+    console.log({ shownFolders });
 
-    if (folders.length === 0) return null;
+    if (shownFolders.length === 0) return null;
 
     return (
       <List sx={styles.folders}>
-        {["All", ...folders].map((text, index) => {
+        {[
+          {
+            name: "All",
+            dummy: true,
+            id: -1,
+          },
+          ...shownFolders,
+        ].map((folder, index) => {
           const isSelected = index === 0;
           return (
             <ListItem
-              key={text}
+              key={folder.id}
               disablePadding
               sx={{
                 ...styles.folder,
@@ -233,7 +246,13 @@ export default function MiniDrawer() {
               }}
               onClick={() => {}}
             >
-              <Typography fontSize={"small"}>{text}</Typography>
+              <Typography
+                fontSize={"12px"}
+                color="textPrimary"
+                sx={{ textAlign: "center" }}
+              >
+                {folder.name || "Unnamed folder"}
+              </Typography>
             </ListItem>
           );
         })}
