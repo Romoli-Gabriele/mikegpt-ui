@@ -21,6 +21,7 @@ import {
   DeleteForeverOutlined,
   FolderOutlined,
   EditOutlined,
+  CheckOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
@@ -60,7 +61,7 @@ export const WorkspaceModal = ({ open, setOpen }) => {
 
   const canDelete = React.useMemo(() => {
     if (!workspaceLoaded) return false;
-    if (workspaces.length === 0) return false;
+    else if (workspaces.length < 2) return false;
     else return true;
   }, [workspaces, workspaceLoaded]);
 
@@ -112,6 +113,7 @@ export const WorkspaceModal = ({ open, setOpen }) => {
         folderId,
         newName
       );
+
       if (!updatedWorkspace) throw new Error("Error renaming folder");
       setSelectedWorkspace(updatedWorkspace);
       enqueueSnackbar("Folder renamed", { variant: "success" });
@@ -211,6 +213,8 @@ export const WorkspaceModal = ({ open, setOpen }) => {
               />
             )}
             {sortedWorkspaces.map((x) => {
+              let isSelected = x.id === currentWorkspaceId;
+
               return (
                 <ListItem
                   key={x.id + ""}
@@ -223,7 +227,13 @@ export const WorkspaceModal = ({ open, setOpen }) => {
                     sx={{ borderRadius: theme.shape.borderRadius + "px" }}
                   >
                     <ListItemIcon>
-                      <SpaceDashboardOutlined />
+                      {
+                        isSelected ? (
+                          <CheckOutlined color="primary" />
+                        ) : (
+                          <SpaceDashboardOutlined />
+                        ) // Dashboard
+                      }
                     </ListItemIcon>
                     <ListItemText primary={x?.name} />
                   </ListItemButton>

@@ -35,9 +35,7 @@ export const ChatModal = ({
   const [screen, setScreen] = React.useState("main");
   const [folderName, setFolderName] = React.useState("");
 
-  const folder = {
-    name: "TEST",
-  };
+  const folder = undefined;
 
   const handleClose = () => {
     setOpen(false);

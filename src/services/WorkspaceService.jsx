@@ -149,6 +149,8 @@ const createWorkspace = async (name = "Unnamed workspace") => {
 
   // IMPOSTA COME DEFAULT
   actions.chat.setCurrentWorkspaceId(newWorkspace.id);
+
+  return newWorkspace;
 };
 
 const deleteWorkspace = async (workspaceId) => {

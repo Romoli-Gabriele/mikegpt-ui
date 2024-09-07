@@ -7,7 +7,7 @@ const createConversation = async () => {
   if (!res?.data?.conversationid)
     throw new Error("Failed to create conversation");
 
-  console.log("created new conversation", res.data);
+  console.log("Created new conversation=", res.data);
 
   const actions = store.getActions();
 
