@@ -205,13 +205,55 @@ const fetchChatSessions = async (folderId = -1) => {
   }
 };
 
-const fetchAndloadConversations = async () => {
-  let data = [];
-  // Preleva le sessioni
-  const x = await fetchChatSessions(-1);
-  data = data.concat(x);
+/**
+ *  Richiede al server e carica nello store tutte le conversazioni
+ * delle cartelle della workspace specifica
+ * (le conversazioni fuori dalle cartelle sono già state restituite
+ * nella workspace stessa)
+ * @param {*} workspaceId
+ * @returns
+ */
+const fetchAndLoadWorkspaceConversations = async (workspaceId) => {
+  console.log("loading conversations for workspace", workspaceId);
+  const workspaces = store.getState().chat.workspaces;
+  const currentWorkspace = workspaces.find(
+    (x) => String(x.id) === String(workspaceId)
+  );
+  if (!currentWorkspace) {
+    console.warn("Current Workspace not found during conversations fetch");
+    return;
+  }
 
-  store.getActions().chat.setConversations(data);
+  // Esegue il fetch delle conversazioni per ogni cartella
+  const folder_session_dic = {};
+  for (const folder of currentWorkspace.folders || []) {
+    try {
+      const sessions = await fetchChatSessions(folder.id);
+      folder_session_dic[String(folder.id)] =
+        sessions?.map((x) => ({
+          ...x,
+          folderId: Number(folder.id),
+        })) || [];
+    } catch (error) {
+      console.error("fetchAndloadConversations", error);
+      continue;
+    }
+  }
+
+  // Aggiorna lo store
+  const updatedWorkspaces = workspaces.map((x) => {
+    if (String(x.id) === String(workspaceId)) {
+      return {
+        ...x,
+        folders: x.folders.map((f) => ({
+          ...f,
+          chatSessions: folder_session_dic[String(f.id)] || [],
+        })),
+      };
+    }
+    return x;
+  });
+  store.getActions().chat.setWorkspaces(updatedWorkspaces);
 };
 
 const deleteConversation = async (conversationId) => {
@@ -247,6 +289,6 @@ export const ConversationService = {
   openNewConversation,
   fetchConversationById,
   openConversation,
-  fetchAndloadConversations,
+  fetchAndLoadWorkspaceConversations,
   deleteConversation,
 };

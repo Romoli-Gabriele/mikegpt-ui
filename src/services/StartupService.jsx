@@ -4,21 +4,29 @@ import { WorkspaceService } from "./WorkspaceService";
 
 const postAuthFlow = async (user) => {
   if (!user) return;
-  // Richiede al server la lista delle workspace
-  WorkspaceService.getWorkspacesDetails().then((workspaces) => {
-    store.getActions().chat.setWorkspaces(workspaces);
-    store.getActions().chat.setWorkspaceLoaded(true);
+  try {
+    // Richiede al server la lista delle workspace
+    const workspaces = await WorkspaceService.loadWorkspaces();
     // Verifica che l'utente sia in una workspace valida
-    workspaceAndFoldersCheck(workspaces);
-
-    // Carica la lista delle conversazioni
-    ConversationService.fetchAndloadConversations().then(() => {
-      console.log("Loaded conversations");
-    });
-  });
+    const { currentWorkspaceId } = await loadAndCheckCurrentWorkspace(
+      workspaces
+    );
+    // Carica le conversazioni della workspace corrente
+    await ConversationService.fetchAndLoadWorkspaceConversations(
+      currentWorkspaceId
+    );
+  } catch (error) {
+    console.error("Error in postAuthFlow", error);
+  }
 };
 
-const workspaceAndFoldersCheck = async (workspaces) => {
+/**
+ * Carica dallo storage in memoria la workspace corrente e la cartella corrente
+ * Se non esiste un workspace corrente o se c'è un problema con la workspace corrente
+ * la seleziona automaticamente una nuova o ne crea una di default
+ * @param {*} workspaces
+ */
+const loadAndCheckCurrentWorkspace = async (workspaces) => {
   // Carica l'ID della workspace corrente
   const currentWorkspaceId = await store
     .getActions()
@@ -63,6 +71,10 @@ const workspaceAndFoldersCheck = async (workspaces) => {
     "Loaded selected workspace",
     store.getState().chat.currentWorkspaceId
   );
+
+  return {
+    currentWorkspaceId: store.getState().chat.currentWorkspaceId,
+  };
 };
 
 export const StartupService = { postAuthFlow };

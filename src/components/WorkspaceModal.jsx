@@ -30,6 +30,7 @@ import { WorkspaceService } from "../services/WorkspaceService";
 import { useStoreState, useStoreActions } from "easy-peasy";
 import { useSnackbar } from "notistack";
 import { store } from "../store";
+import { ConversationService } from "../services/ConversationService";
 
 export const WorkspaceModal = ({ open, setOpen }) => {
   const theme = useTheme();
@@ -134,6 +135,14 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     } catch (e) {
       enqueueSnackbar("Error deleting folder", { variant: "error" });
     }
+  };
+
+  const changeWorkspace = (workspaceId) => async () => {
+    // Salva nello store l'ID della workspace corrente
+    saveCurrentWorkspaceId(selectedWorkspace.id);
+    // Carica le conversazioni della workspace corrente
+    await ConversationService.fetchAndLoadWorkspaceConversations(workspaceId);
+    handleClose();
   };
 
   const createWorkspace = async () => {
@@ -311,10 +320,7 @@ export const WorkspaceModal = ({ open, setOpen }) => {
             variant="outlined"
             color="primary"
             sx={{ mt: 2, width: "100%" }}
-            onClick={() => {
-              saveCurrentWorkspaceId(selectedWorkspace.id);
-              handleClose();
-            }}
+            onClick={changeWorkspace(selectedWorkspace.id)}
           >
             Use workspace
           </Button>

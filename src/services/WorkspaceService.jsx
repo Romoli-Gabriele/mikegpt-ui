@@ -89,7 +89,7 @@ const renameFolder = async (workspaceId, folderId, name) => {
   return updatedWorkspace;
 };
 
-const getWorkspacesDetails = async () => {
+const fetchWorkspacesDetails = async () => {
   try {
     const res = await apiClient.get(`/list_workspaces_with_details`);
     return res?.data?.data || [];
@@ -97,6 +97,32 @@ const getWorkspacesDetails = async () => {
     console.error("list_workspaces_with_details", error);
     return [];
   }
+};
+
+const loadWorkspaces = async () => {
+  const _workspaces = await fetchWorkspacesDetails();
+  // Formatta le workspace
+  const workspaces = _workspaces.map((w) => ({
+    ...w,
+    folders: w.folders.map((f) => ({
+      id: f.id,
+      name: f.name,
+      created_at: f.created_at,
+      chatSessions: [], // Vengono caricate in seguito
+    })),
+    chatSessions:
+      w.chatSessions?.map((session) => ({
+        ...session,
+        // aggiunge il folder_id
+        folderId: -1,
+      })) || [],
+  }));
+
+  const actions = store.getActions();
+  actions.chat.setWorkspaces(workspaces);
+  actions.chat.setWorkspaceLoaded(true);
+
+  return workspaces;
 };
 
 const deleteWorkspaceAPI = async (workspaceId) => {
@@ -180,7 +206,7 @@ const deleteFolder = async (folderId, workspaceId) => {
   if (!res) throw new Error("Error deleting folder");
   // AGGIORNA IL WORKSPACE
   const actions = store.getActions();
-  const workspaces = await getWorkspacesDetails();
+  const workspaces = await fetchWorkspacesDetails();
   const updatedWorkspace = workspaces.find((x) => x.id === workspaceId);
   actions.chat.setWorkspaces([
     ...workspaces.filter((x) => x.id !== workspaceId),
@@ -194,7 +220,8 @@ export const WorkspaceService = {
   createFolder: createFolderAPI,
   renameWorkspace,
   renameFolder,
-  getWorkspacesDetails,
+  fetchWorkspacesDetails,
   deleteFolder,
   deleteWorkspace,
+  loadWorkspaces,
 };
