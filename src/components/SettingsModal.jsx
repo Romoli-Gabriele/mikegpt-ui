@@ -1,17 +1,37 @@
-import * as React from "react";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { Divider } from "@mui/material";
-import { ModeEdit, Delete, CancelOutlined } from "@mui/icons-material";
+import { ModeEdit, CancelOutlined } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import { PoliciesLinks } from "./Footer";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import {useAuth} from "../hooks/useAuth.jsx";
+import {unsubscribeStripe} from "../services/StripeService.jsx";
+import {router} from "../App.jsx";
 
 export const SettingsModal = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const handleClose = () => setOpen(false);
+  const { user, logout } = useAuth();
+  const unsubscribe = () => {
+
+    //TODO aggiungere subscriptionId a user
+    //user.subscriptionId = "sub_1PwrQqJ7S8yxZLrWheVDgXh5"
+    if(user.subscriptionId)
+      unsubscribeStripe(user.subscriptionId).then(
+        () => {
+            console.log("Unsubscribed");
+            user.subscriptionId = null;
+            logout()
+        }
+    )
+    else {
+      console.log("No subscriptionId found");
+      router.navigate("/products");
+    }
+  }
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
       <Modal
@@ -42,6 +62,7 @@ export const SettingsModal = ({ open, setOpen }) => {
             color="error"
             sx={{ mt: 2, width: "100%" }}
             startIcon={<CancelOutlined />}
+            onClick={unsubscribe}
           >
             Cancel Subscription
           </Button>
