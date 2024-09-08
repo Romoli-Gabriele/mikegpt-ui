@@ -168,8 +168,8 @@ export const WorkspaceModal = ({ open, setOpen }) => {
     return (
       <Stack direction="row" sx={{ mb: 2 }} alignItems="center">
         {backButton && (
-          <IconButton>
-            <ChevronLeft onClick={reset} />
+          <IconButton onClick={reset}>
+            <ChevronLeft />
           </IconButton>
         )}
         <Box

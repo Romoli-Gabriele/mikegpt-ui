@@ -1,12 +1,12 @@
 import * as React from "react";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { Box, IconButton, Stack } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import { ModalBox } from "./ModalBox";
 import { useTheme } from "@emotion/react";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { AttachmentRounded, LinkRounded } from "@mui/icons-material";
+import { LinkRounded } from "@mui/icons-material";
 
 export const SourcesModal = ({ documents = [] }) => {
   const [open, setOpen] = React.useState(false);
@@ -14,7 +14,9 @@ export const SourcesModal = ({ documents = [] }) => {
   const handleClose = () => setOpen(false);
   const theme = useTheme();
 
-  const displaySources = documents;
+  const displaySources = documents || [];
+
+  console.log({ displaySources });
 
   const renderSource = (source, index) => {
     return (
@@ -98,7 +100,8 @@ export const SourcesModal = ({ documents = [] }) => {
             Sources
           </Typography>
 
-          {displaySources.map((source, index) => renderSource(source, index))}
+          {Array.isArray(displaySources) &&
+            displaySources.map((source, index) => renderSource(source, index))}
         </ModalBox>
       </Modal>
     </div>

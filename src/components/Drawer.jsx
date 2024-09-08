@@ -203,11 +203,11 @@ export default function MiniDrawer() {
     setSearchTerm(value);
   };
 
-  const renderChat = (chat, index) => {
+  const renderChat = (chat) => {
     return (
       <ChatItem
         chat={chat}
-        key={chat.conversationId}
+        key={chat.id}
         currentConversationId={currentConversationId}
         styles={styles}
       />

@@ -1,8 +1,8 @@
-import { createStore } from "easy-peasy";
+import { createStore, persist } from "easy-peasy";
 import { chatModel } from "./chat";
 
 const model = {
-  chat: chatModel,
+  chat: persist(chatModel),
 };
 
 export const store = createStore(model);

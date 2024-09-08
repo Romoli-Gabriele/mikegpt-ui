@@ -92,8 +92,8 @@ export const ChatModal = ({
         alignItems="center"
       >
         {backButton && (
-          <IconButton>
-            <ChevronLeft onClick={reset} />
+          <IconButton onClick={reset}>
+            <ChevronLeft />
           </IconButton>
         )}
         <Typography id="modal-modal-title" variant="h5" component="h1">
