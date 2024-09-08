@@ -6,3 +6,5 @@ export const drawerItemMarginPx = 5;
  *  TODO: configurare vero limite
  */
 export const QUERY_MAX_TOKEN = 1000;
+
+export const DEFAULT_CHAT_NAME = "Untitled chat";

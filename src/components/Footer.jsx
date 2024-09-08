@@ -30,7 +30,7 @@ export const MinimizedFooter = () => {
   );
 };
 
-export const PoliciesLinks = (showLogoutButton = false) => {
+export const PoliciesLinks = ({ showLogoutButton }) => {
   const { user, logout } = useAuth();
 
   return (
@@ -68,7 +68,7 @@ export const PoliciesLinks = (showLogoutButton = false) => {
       >
         ToS
       </a>
-      {showLogoutButton && user && (
+      {!!showLogoutButton && !!user && (
         <>
           {" "}
           -{" "}

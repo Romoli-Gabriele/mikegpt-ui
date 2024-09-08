@@ -165,8 +165,25 @@ export default function MiniDrawer() {
     return currentWorkspace?.folders || [];
   }, [workspaces, currentWorkspaceId]);
 
-  const chats = React.useMemo(() => {
+  const shownChats = React.useMemo(() => {
     let filteredConversations = [...conversations];
+
+    filteredConversations = filteredConversations
+      .filter(
+        (conversation) =>
+          // o non hanno data o sono degli ultimi 30 giorni
+          !conversation.created_at ||
+          new Date().getTime() - new Date(conversation.created_at).getTime() <
+            30 * 24 * 60 * 60 * 1000
+      )
+      // ordina per data (se non c'è la data, metti in fondo)
+      .sort((a, b) => {
+        if (!a.created_at) return 1;
+        if (!b.created_at) return -1;
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
 
     if (searchTerm && searchTerm.length >= 3) {
       // usa una espressione regolare per cercare il termine di ricerca parziale e case insensitive
@@ -180,12 +197,14 @@ export default function MiniDrawer() {
       today:
         filteredConversations?.filter(
           (conversation) =>
-            new Date().getDate() === conversation.date?.getDate()
+            new Date().getDate() ===
+            new Date(conversation.created_at)?.getDate()
         ) || [],
       last30Days:
         filteredConversations?.filter(
           (conversation) =>
-            new Date().getDate() !== conversation.date?.getDate()
+            new Date().getDate() !==
+            new Date(conversation.created_at)?.getDate()
         ) || [],
     };
   }, [conversations, searchTerm]);
@@ -261,7 +280,7 @@ export default function MiniDrawer() {
   const renderChats = () => {
     return (
       <>
-        {chats.today.length > 0 && (
+        {shownChats.today.length > 0 && (
           <Typography
             fontSize="small"
             color="textSecondary"
@@ -271,9 +290,9 @@ export default function MiniDrawer() {
             Today
           </Typography>
         )}
-        {chats.today.map((chat, index) => renderChat(chat, index))}
+        {shownChats.today.map((chat, index) => renderChat(chat, index))}
 
-        {chats.last30Days.length > 0 && (
+        {shownChats.last30Days.length > 0 && (
           <Typography
             fontSize="small"
             color="textSecondary"
@@ -283,7 +302,7 @@ export default function MiniDrawer() {
             Last 30 days
           </Typography>
         )}
-        {chats.last30Days.map((chat, index) => renderChat(chat, index))}
+        {shownChats.last30Days.map((chat, index) => renderChat(chat, index))}
       </>
     );
   };
