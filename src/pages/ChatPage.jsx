@@ -69,10 +69,8 @@ const ChatPage = () => {
   const createConversation = async () => {
     setLoading(true);
     try {
-      const res = await ConversationService.createConversation();
-
-      setConversationId(res["conversationid"]);
-      return res["conversationid"];
+      const conversationid = await ConversationService.createConversation();
+      return conversationid;
     } catch (e) {
       console.log(e);
     }

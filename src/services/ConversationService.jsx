@@ -1,30 +1,48 @@
+import { DEFAULT_CHAT_NAME } from "../config.jsx";
 import { store } from "../store/index.jsx";
 import { lambdaClient, apiClient } from "./ApiService.jsx";
+import { tryToConvertToArrayHelper } from "./utils.jsx";
 
 const createConversation = async () => {
-  // Crea la nuova conversazione lato server
-  const res = await lambdaClient.post("/conversation");
-  if (!res?.data?.conversationid)
+  // Preleva l'ID del workspace corrente
+  const workspaceId = store.getState().chat.currentWorkspaceId;
+  if (!workspaceId) throw new Error("No workspace selected");
+
+  // Crea la nuova conversazione
+  const conversationRes = await lambdaClient.post("/conversation");
+  if (!conversationRes?.data?.conversationid)
     throw new Error("Failed to create conversation");
 
-  console.log("Created new conversation=", res.data);
+  const conversationId = conversationRes.data.conversationid;
 
-  const actions = store.getActions();
+  console.log("Created new conversation=", conversationId);
+
+  // Crea la nuova sessione di chat
+  const sessionRes = await apiClient.post("/create_chat_session", {
+    name: DEFAULT_CHAT_NAME,
+    conversationId: conversationId,
+    workspaceId: Number(workspaceId),
+    folderId: -1, // TODO aggiungere folderId
+  });
+
+  console.log("Created new session");
 
   // Aggiunge la nuova conversazione in cima alla lista
+  const actions = store.getActions();
+
   actions.chat.setConversations([
     {
-      conversationId: res.data.conversationid,
-      title: undefined,
-      date: new Date(),
+      conversationId,
+      name: DEFAULT_CHAT_NAME,
+      created_at: new Date().toISOString(),
     },
     ...store.getState().chat.conversations,
   ]);
 
   // Imposta l'ID della conversazione come attiva
-  actions.chat.setConversationId(res.data.conversationid);
+  actions.chat.setConversationId(conversationId);
 
-  return res.data;
+  return conversationId;
 };
 
 const getConversation = async (conversationId) => {
@@ -161,7 +179,7 @@ const formatMessage = (message) => {
   return {
     data: {
       content: message.message,
-      documents: message.docs,
+      documents: tryToConvertToArrayHelper(message.docs),
       runid: message.runid,
     },
     type: message.type,
