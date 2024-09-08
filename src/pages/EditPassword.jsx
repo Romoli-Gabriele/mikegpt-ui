@@ -4,6 +4,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import mike_legal from "../assets/mike_legal.jpg";
 import { useState } from "react";
 import { useSnackbar } from "notistack";
+import AuthService from "../services/AuthService";
 
 const EditPasswordPage = () => {
   const navigate = useNavigate();
@@ -14,24 +15,23 @@ const EditPasswordPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (event) => {
-    // event.preventDefault();
-    // setLoading(true);
-    // setError(null);
-    // const res = await login(email, password);
-    // setLoading(false);
-    // if (!res.success) {
-    //   setError(res.error);
-    // } else {
-    //   navigate("/");
-    // }
-
     event.preventDefault();
 
-    if (true) {
+    try {
+      const success = await AuthService.changePassword(
+        prevPassword,
+        newPassword
+      );
+
+      if (!success) {
+        throw new Error("Not implemented");
+      } else {
+        enqueueSnackbar("Password updated", { variant: "success" });
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("change password", error);
       setError("Something went wrong: maybe the current password is wrong");
-    } else {
-      enqueueSnackbar("Password updated", { variant: "success" });
-      navigate("/");
     }
   };
 
