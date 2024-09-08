@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import {useAuth} from "../hooks/useAuth.jsx";
 
 const sk = "sk_test_51OYqUwJ7S8yxZLrWWoV2MdH8JUa6ASOPAxpNSrsi9mz2eCvX2VWzkmlUhjm3paqWI8CqqEHdsYYwKvepM2gNqnM400znIifH0D";
 
@@ -38,4 +39,8 @@ export const createCheckoutSession = async (productId) => {
     });
 
     window.open(session.url, "_self");
+}
+
+export const unsubscribeStripe = async (subscriptionId) => {
+    return await stripe.subscriptions.cancel(subscriptionId);
 }
