@@ -142,25 +142,10 @@ const fetchConversationById = async (conversationId) => {
   };
 };
 
-const fetchAllConversations = async () => {
-  try {
-    console.log("fetchAllConversations");
-    const res = await lambdaClient.get("/list_chat_sessions");
-    if (!res?.data?.conversations)
-      throw new Error("Failed to fetch conversations");
-
-    console.log("fetchAllConversations", res.data);
-    // const actions = store.getActions();
-    // actions.chat.setConversations(res.data.conversations);
-  } catch (error) {
-    console.error("fetchAllConversations", error);
-  }
-};
-
-//fetchAllConversations();
-
 const openConversation = async (conversationId) => {
   try {
+    if (store.getState().chat.conversationId === conversationId) return;
+
     console.log("loading conversation", conversationId);
     store.getActions().chat.setConversationId(conversationId);
     store.getActions().chat.setLoading(true);
@@ -170,9 +155,16 @@ const openConversation = async (conversationId) => {
       store.getActions().chat.setLoading(false);
       return;
     }
+
     const messages = res.data.data?.map(formatMessage) || [];
-    console.log("fetched conversation", messages);
+
+    //Ordina i messaggi per data:i più recenti in fondo
+    messages.sort((a, b) => {
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+
     store.getActions().chat.setMessages(messages);
+    console.log("fetched conversation", messages);
   } catch (error) {
     console.error(error);
   } finally {
@@ -188,6 +180,7 @@ const formatMessage = (message) => {
       runid: message.runid,
     },
     type: message.type,
+    created_at: message.created_at,
   };
 };
 
@@ -262,10 +255,9 @@ const fetchAndLoadWorkspaceConversations = async (workspaceId) => {
 };
 
 const deleteConversation = async (conversationId) => {
-  console.log("deleteConversation", conversationId);
   try {
     const res = await apiClient.post(`/delete_chat_session`, {
-      chatSessionId: conversationId,
+      conversationId: conversationId,
     });
 
     if (res.status !== 200) return false;
@@ -282,7 +274,68 @@ const deleteConversation = async (conversationId) => {
   }
 };
 
+const renameConversation = async (
+  conversationId,
+  newName,
+  workspaceId,
+  folderId
+) => {
+  try {
+    const res = await apiClient.post(`/rename_chat_session`, {
+      conversationId: conversationId,
+      chatSessionId: conversationId,
+      name: newName,
+    });
+    console.log("renameConversation", res.data);
+
+    // Aggiorna lo store
+    store.getActions().chat.modifyConversation({
+      conversationId: conversationId,
+      workspaceId: workspaceId,
+      folderId: folderId,
+      edits: { name: newName },
+    });
+  } catch (error) {
+    console.error("renameConversation", error);
+    return false;
+  }
+};
+
+const addConversationToFolder = async (
+  conversationId,
+  workspaceId,
+  folderId,
+  newFolderId
+) => {
+  if (folderId === newFolderId) return;
+  let res;
+  if (newFolderId === -1) {
+    res = await apiClient.post(`/remove_chat_session_from_folder`, {
+      conversationId: conversationId,
+    });
+  } else {
+    res = await apiClient.post(`/add_chat_session_to_folder`, {
+      conversationId: conversationId,
+      destFolderId: newFolderId,
+    });
+  }
+
+  if (res.status !== 200) {
+    console.error("addConversationToFolder", res.data);
+    return;
+  }
+
+  // Aggiorna lo store
+  store.getActions().chat.moveConversationToFolder({
+    conversationId,
+    workspaceId,
+    folderId,
+    newFolderId,
+  });
+};
+
 export const ConversationService = {
+  addConversationToFolder,
   createConversation,
   getConversation,
   sendMessage,
@@ -294,4 +347,5 @@ export const ConversationService = {
   openConversation,
   fetchAndLoadWorkspaceConversations,
   deleteConversation,
+  renameConversation,
 };

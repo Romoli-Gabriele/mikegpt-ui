@@ -17,39 +17,85 @@ import {
   ChevronLeft,
   AddOutlined,
   RemoveOutlined,
+  EditOutlined,
 } from "@mui/icons-material";
 import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
 import { store } from "../store";
 import { ConversationService } from "../services/ConversationService";
+import { useSnackbar } from "notistack";
+import { useStoreState } from "easy-peasy";
 
-const data = [];
-
-export const ChatModal = ({
-  open,
-  setOpen,
-  title: chatTitle,
-  conversationId,
-}) => {
+export const ChatModal = ({ open, setOpen, chat }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const [screen, setScreen] = React.useState("main");
   const [folderName, setFolderName] = React.useState("");
+  const [folder, setFolder] = React.useState(null);
+  const workspaces = useStoreState((state) => state.chat.workspaces);
+  const currentWorkspaceId = useStoreState(
+    (state) => state.chat.currentWorkspaceId
+  );
+  const chatTitle = chat.name;
+  const conversationId = chat.id;
 
-  const folder = undefined;
+  const folders = React.useMemo(() => {
+    const currentWorkspace = workspaces.find(
+      (x) => String(x.id) === String(currentWorkspaceId)
+    );
+    return currentWorkspace?.folders || [];
+  }, [workspaces, currentWorkspaceId]);
 
   const handleClose = () => {
     setOpen(false);
     reset();
   };
 
-  const deleteChat = () => {
-    // ELIMINA LA CHAT
+  React.useEffect(() => {
+    // Carica la cartella in cui si trova la chat
+    if (!chat.folderId || chat.folderId === -1) {
+      setFolder(null);
+    } else {
+      const currentWorkspace = workspaces.find(
+        (x) => String(x.id) === String(currentWorkspaceId)
+      );
+      const folder = currentWorkspace.folders.find(
+        (x) => String(x.id) === String(chat.folderId)
+      );
+      if (folder) setFolder(folder);
+    }
+  }, [chat]);
 
-    ConversationService.deleteConversation(conversationId);
+  const renameChat = async () => {
+    let newName = prompt("Enter the new chat name", chatTitle);
+    newName = newName?.trim();
+    if (!newName || newName === chatTitle || newName.length === 0) return;
+    const res = ConversationService.renameConversation(
+      conversationId,
+      newName,
+      store.getState().chat.currentWorkspaceId,
+      chat.folderId || -1
+    );
+    if (res) {
+      enqueueSnackbar("Chat renamed", { variant: "success" });
+    } else {
+      enqueueSnackbar("An error occurred", { variant: "error" });
+    }
+  };
 
-    // CHIUDI IL MODAL
-    handleClose();
+  const deleteChat = async () => {
+    try {
+      // ELIMINA LA CHAT
+      await ConversationService.deleteConversation(conversationId);
+
+      enqueueSnackbar("Chat deleted", { variant: "success" });
+
+      // CHIUDI IL MODAL
+      handleClose();
+    } catch (e) {
+      enqueueSnackbar("An error occurred", { variant: "error" });
+    }
   };
 
   const createFolder = () => {
@@ -59,9 +105,14 @@ export const ChatModal = ({
     addToFolder("folderId");
   };
 
-  const addToFolder = (folderId) => {
+  const addToFolder = (newFolderId) => {
     // AGGIUNGI LA CHAT ALLA CARTELLA
-    // TODO: implementare
+    ConversationService.addConversationToFolder(
+      conversationId,
+      store.getState().chat.currentWorkspaceId,
+      typeof chat.folderId === "number" ? chat.folderId : -1,
+      newFolderId
+    );
     // CHIUDI IL MODAL
     handleClose();
   };
@@ -110,13 +161,13 @@ export const ChatModal = ({
           {/** Aggiungi la chat a una cartella */}
           {folder ? (
             <Button
-              onClick={openFolderSelection}
+              onClick={() => addToFolder(-1)}
               variant="outlined"
               color="warning"
               sx={{ mt: 2, width: "100%" }}
               startIcon={<RemoveOutlined />}
             >
-              Remove from folder {folder.name}
+              Remove from '{folder.name}'
             </Button>
           ) : (
             <Button
@@ -129,6 +180,17 @@ export const ChatModal = ({
               Add to a folder
             </Button>
           )}
+
+          <Button
+            onClick={renameChat}
+            variant="outlined"
+            color="primary"
+            sx={{ mt: 2, width: "100%" }}
+            startIcon={<EditOutlined />}
+          >
+            Rename chat
+          </Button>
+
           {/** Elimina la chat */}
           <Button
             variant="outlined"
@@ -151,7 +213,7 @@ export const ChatModal = ({
               overflowY: "auto",
             }}
           >
-            {data.map((x) => {
+            {folders.map((x) => {
               return (
                 <ListItemButton
                   key={x}
@@ -165,13 +227,13 @@ export const ChatModal = ({
                   <ListItemIcon>
                     <FolderOutlined />
                   </ListItemIcon>
-                  <ListItemText primary="Folder 1" />
+                  <ListItemText primary={x.name} />
                 </ListItemButton>
               );
             })}
           </List>
 
-          {data.length === 0 && (
+          {folders.length === 0 && (
             <Typography variant="body2" sx={{ mt: 2, mb: 2 }} align="center">
               You don't have any folders yet
             </Typography>

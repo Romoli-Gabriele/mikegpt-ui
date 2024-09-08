@@ -153,7 +153,7 @@ const createWorkspace = async (name = "Unnamed workspace") => {
   if (!res) throw new Error("Error creating workspace");
 
   // CARICA NUOVAMENTE LA LISTA WORKSPACES
-  const newData = await WorkspaceService.getWorkspacesDetails();
+  const newData = await WorkspaceService.fetchWorkspacesDetails();
 
   const actions = store.getActions();
 

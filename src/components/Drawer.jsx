@@ -30,7 +30,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useStoreState } from "easy-peasy";
+import { useStoreActions, useStoreState } from "easy-peasy";
 import { ChatItem } from "./ChatItem.jsx";
 import { useTheme } from "@emotion/react";
 import { WorkspaceModal } from "./WorkspaceModal.jsx";
@@ -147,6 +147,10 @@ export default function MiniDrawer() {
   const currentWorkspaceId = useStoreState(
     (state) => state.chat.currentWorkspaceId
   );
+  const currentFolderId = useStoreState((state) => state.chat.currentFolderId);
+  const setCurrentFolderId = useStoreActions(
+    (actions) => actions.chat.setCurrentFolderId
+  );
 
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down("sm"));
@@ -169,14 +173,24 @@ export default function MiniDrawer() {
     const currentWorkspace = workspaces?.find(
       (workspace) => String(workspace.id) === String(currentWorkspaceId)
     );
-    // Carica le chat senza cartella
-    merged.push(...(currentWorkspace?.chatSessions || []));
-    // Carica le chat delle cartelle
-    merged.push(
-      ...(currentWorkspace?.folders?.map(
-        (folder) => folder?.chatSessions || []
-      ) || [])
-    );
+    if (!currentFolderId || currentFolderId === -1) {
+      // Carica le chat senza cartella
+      merged.push(...(currentWorkspace?.chatSessions || []));
+      // Carica le chat delle cartelle
+      merged.push(
+        ...(
+          currentWorkspace?.folders?.map(
+            (folder) => folder?.chatSessions || []
+          ) || []
+        ).flat()
+      );
+    } else {
+      // Carica solo le chat della cartella selezionata
+      const folder = currentWorkspace?.folders?.find(
+        (folder) => String(folder.id) === String(currentFolderId)
+      );
+      merged.push(...(folder?.chatSessions || []));
+    }
 
     merged = merged
       // Filtra per data
@@ -196,6 +210,7 @@ export default function MiniDrawer() {
         );
       });
 
+    // RICERCA PARZIALE
     if (searchTerm && searchTerm.length >= 3) {
       // usa una espressione regolare per cercare il termine di ricerca parziale e case insensitive
       const regex = new RegExp(searchTerm, "i");
@@ -216,7 +231,7 @@ export default function MiniDrawer() {
             new Date(conversation.created_at)?.getDate()
         ) || [],
     };
-  }, [workspaces, searchTerm]);
+  }, [workspaces, searchTerm, currentFolderId]);
 
   const handleOpenClose = () => {
     setOpen(!open);
@@ -235,7 +250,7 @@ export default function MiniDrawer() {
     return (
       <ChatItem
         chat={chat}
-        key={chat.id}
+        key={chat.id + "chat"}
         currentConversationId={currentConversationId}
         styles={styles}
       />
@@ -244,8 +259,6 @@ export default function MiniDrawer() {
 
   const renderFolders = () => {
     if (!open) return null;
-
-    console.log({ shownFolders });
 
     if (shownFolders.length === 0) return null;
 
@@ -259,7 +272,9 @@ export default function MiniDrawer() {
           },
           ...shownFolders,
         ].map((folder, index) => {
-          const isSelected = index === 0;
+          const isSelected =
+            String(folder.id) === String(currentFolderId) ||
+            (!currentFolderId && index === 0);
           return (
             <ListItem
               key={folder.id}
@@ -270,7 +285,7 @@ export default function MiniDrawer() {
                   ? "var(--background-highlight-color)"
                   : "transparent",
               }}
-              onClick={() => {}}
+              onClick={() => setCurrentFolderId(folder.id)}
             >
               <Typography
                 fontSize={"12px"}
@@ -291,6 +306,7 @@ export default function MiniDrawer() {
       <>
         {shownChats.today.length > 0 && (
           <Typography
+            key={"today"}
             fontSize="small"
             color="textSecondary"
             fontWeight={"bold"}
@@ -303,6 +319,7 @@ export default function MiniDrawer() {
 
         {shownChats.last30Days.length > 0 && (
           <Typography
+            key={"last30days"}
             fontSize="small"
             color="textSecondary"
             fontWeight={"bold"}
@@ -320,8 +337,13 @@ export default function MiniDrawer() {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <Drawer variant="permanent" open={open}>
-        <Stack sx={{ height: "100vh", borderRight: DRAWER_RIGHT_BORDER }}>
-          <Box sx={{ overflowY: "auto" }}>
+        <Stack
+          sx={{
+            height: "100vh",
+            borderRight: DRAWER_RIGHT_BORDER,
+          }}
+        >
+          <Box sx={{ overflowY: "auto", overflowX: open ? "auto" : "hidden" }}>
             <List>
               <ListItem disablePadding={true} sx={{ display: "block" }}>
                 <Box

@@ -14,7 +14,7 @@ import { drawerItemMarginPx } from "../config";
 
 export const ChatItem = ({ chat, currentConversationId, styles }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isSelected = chat.conversationId === currentConversationId;
+  const isSelected = String(chat.id) === String(currentConversationId);
   const theme = useTheme();
 
   return (
@@ -57,12 +57,7 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
         </ListItemSecondaryAction>
       </ListItem>
 
-      <ChatModal
-        open={isModalOpen}
-        setOpen={setIsModalOpen}
-        title={chat.title}
-        conversationId={chat.id}
-      />
+      <ChatModal open={isModalOpen} setOpen={setIsModalOpen} chat={chat} />
     </Box>
   );
 };
