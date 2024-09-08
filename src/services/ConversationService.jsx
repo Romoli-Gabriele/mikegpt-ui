@@ -2,11 +2,13 @@ import { DEFAULT_CHAT_NAME } from "../config.jsx";
 import { store } from "../store/index.jsx";
 import { lambdaClient, apiClient } from "./ApiService.jsx";
 import { tryToConvertToArrayHelper } from "./utils.jsx";
+import { WorkspaceService } from "./WorkspaceService.jsx";
 
 const createConversation = async () => {
   // Preleva l'ID del workspace corrente
   const workspaceId = store.getState().chat.currentWorkspaceId;
   if (!workspaceId) throw new Error("No workspace selected");
+  const folderId = WorkspaceService.checkAndGetCurrentFolderId();
 
   // Crea la nuova conversazione
   const conversationRes = await lambdaClient.post("/conversation");
@@ -15,29 +17,32 @@ const createConversation = async () => {
 
   const conversationId = conversationRes.data.conversationid;
 
-  console.log("Created new conversation=", conversationId);
-
   // Crea la nuova sessione di chat
   const sessionRes = await apiClient.post("/create_chat_session", {
     name: DEFAULT_CHAT_NAME,
     conversationId: conversationId,
     workspaceId: Number(workspaceId),
-    folderId: -1, // TODO aggiungere folderId
+    folderId,
   });
 
-  console.log("Created new session");
+  if (sessionRes?.status !== 200)
+    throw new Error("Failed to create chat session");
+
+  console.log(
+    "Created new session in workspace=",
+    workspaceId,
+    ", folder=",
+    folderId
+  );
 
   // Aggiunge la nuova conversazione in cima alla lista
   const actions = store.getActions();
-
-  actions.chat.setConversations([
-    {
-      conversationId,
-      name: DEFAULT_CHAT_NAME,
-      created_at: new Date().toISOString(),
-    },
-    ...store.getState().chat.conversations,
-  ]);
+  actions.chat.addNewConversation({
+    conversationId: conversationId,
+    workspaceId: workspaceId,
+    folderId: folderId,
+    name: DEFAULT_CHAT_NAME,
+  });
 
   // Imposta l'ID della conversazione come attiva
   actions.chat.setConversationId(conversationId);
@@ -145,8 +150,8 @@ const fetchAllConversations = async () => {
       throw new Error("Failed to fetch conversations");
 
     console.log("fetchAllConversations", res.data);
-    const actions = store.getActions();
-    actions.chat.setConversations(res.data.conversations);
+    // const actions = store.getActions();
+    // actions.chat.setConversations(res.data.conversations);
   } catch (error) {
     console.error("fetchAllConversations", error);
   }
@@ -266,13 +271,11 @@ const deleteConversation = async (conversationId) => {
     if (res.status !== 200) return false;
 
     // Rimuove la conversazione dallo store
-    store
-      .getActions()
-      .chat.setConversations(
-        store
-          .getState()
-          .chat.conversations.filter((x) => x.id !== conversationId)
-      );
+    store.getActions().chat.removeConversation({
+      conversationId: conversationId,
+      workspaceId: store.getState().chat.currentWorkspaceId,
+      folderId: WorkspaceService.checkAndGetCurrentFolderId(),
+    });
   } catch (error) {
     console.error("deleteConversation", error);
     return false;

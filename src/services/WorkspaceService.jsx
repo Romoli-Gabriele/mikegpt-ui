@@ -215,6 +215,31 @@ const deleteFolder = async (folderId, workspaceId) => {
   return updatedWorkspace;
 };
 
+/**
+ * Restituisce il folderId salavato nello store
+ * Ma controlla anche che questo sia effettivamente nella workspace corrente
+ * (per evitare bug)
+ * Restituisce -1 se non è possibile recuperare il folderId o non esiste
+ */
+const checkAndGetCurrentFolderId = () => {
+  const state = store.getState().chat;
+  const currentFolderId = state.currentFolderId;
+  const currentWorkspace = state.currentWorkspaceId;
+  const workspaces = state.workspaces;
+  const currentWorkspaceObj = workspaces.find(
+    (x) => String(x.id) === String(currentWorkspace)
+  );
+  if (!currentWorkspaceObj) return -1;
+  if (
+    !currentFolderId ||
+    !currentWorkspaceObj.folders.find(
+      (x) => String(x.id) === String(currentFolderId)
+    )
+  ) {
+    return -1;
+  } else return currentFolderId || -1;
+};
+
 export const WorkspaceService = {
   createWorkspace,
   createFolder: createFolderAPI,
@@ -224,4 +249,5 @@ export const WorkspaceService = {
   deleteFolder,
   deleteWorkspace,
   loadWorkspaces,
+  checkAndGetCurrentFolderId,
 };

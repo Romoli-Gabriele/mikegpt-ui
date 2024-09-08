@@ -11,7 +11,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ico from "../assets/mike_logo.png";
 import { drawerWidth, drawerItemMarginPx } from "../config.jsx";
 import { SettingsModal } from "./SettingsModal.jsx";
-import { WorkspaceService } from "../services/WorkspaceService.jsx";
 import {
   Add,
   ChevronLeft,
@@ -143,7 +142,6 @@ export default function MiniDrawer() {
   const currentConversationId = useStoreState(
     (state) => state.chat.conversationId
   );
-  const conversations = useStoreState((state) => state.chat.conversations);
   const workspaces = useStoreState((state) => state.chat.workspaces);
   const workspaceLoaded = useStoreState((state) => state.chat.workspaceLoaded);
   const currentWorkspaceId = useStoreState(
@@ -166,9 +164,22 @@ export default function MiniDrawer() {
   }, [workspaces, currentWorkspaceId]);
 
   const shownChats = React.useMemo(() => {
-    let filteredConversations = [...conversations];
+    let merged = [];
+    // Esegue il merge di tutte le conversazioni della workspace corrente
+    const currentWorkspace = workspaces?.find(
+      (workspace) => String(workspace.id) === String(currentWorkspaceId)
+    );
+    // Carica le chat senza cartella
+    merged.push(...(currentWorkspace?.chatSessions || []));
+    // Carica le chat delle cartelle
+    merged.push(
+      ...(currentWorkspace?.folders?.map(
+        (folder) => folder?.chatSessions || []
+      ) || [])
+    );
 
-    filteredConversations = filteredConversations
+    merged = merged
+      // Filtra per data
       .filter(
         (conversation) =>
           // o non hanno data o sono degli ultimi 30 giorni
@@ -188,26 +199,24 @@ export default function MiniDrawer() {
     if (searchTerm && searchTerm.length >= 3) {
       // usa una espressione regolare per cercare il termine di ricerca parziale e case insensitive
       const regex = new RegExp(searchTerm, "i");
-      filteredConversations = filteredConversations.filter((conversation) =>
-        regex.test(conversation.title)
-      );
+      merged = merged.filter((conversation) => regex.test(conversation?.name));
     }
 
     return {
       today:
-        filteredConversations?.filter(
+        merged?.filter(
           (conversation) =>
             new Date().getDate() ===
             new Date(conversation.created_at)?.getDate()
         ) || [],
       last30Days:
-        filteredConversations?.filter(
+        merged?.filter(
           (conversation) =>
             new Date().getDate() !==
             new Date(conversation.created_at)?.getDate()
         ) || [],
     };
-  }, [conversations, searchTerm]);
+  }, [workspaces, searchTerm]);
 
   const handleOpenClose = () => {
     setOpen(!open);
