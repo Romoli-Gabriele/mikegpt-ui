@@ -82,7 +82,8 @@ export const AuthProvider = ({ children, userData }) => {
     navigate("/", { replace: true });
 
     // Svuota lo store
-    // TODO
+    store.persist.clear();
+    store.persist.flush();
   };
 
   const forgotPassword = async (username) => {
@@ -168,7 +169,7 @@ export const AuthProvider = ({ children, userData }) => {
         const attributes = await fetchUserAttributes();
 
         const userData = {
-          ..._user,
+          userId,
           ...attributes,
         };
 

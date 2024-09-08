@@ -1,5 +1,6 @@
 import { Box, Stack, Typography } from "@mui/material";
 import legalgpt from "../assets/legalgpt_logo.png";
+import { useAuth } from "../hooks/useAuth";
 
 export const ExtendedFooter = () => {
   return (
@@ -15,7 +16,7 @@ export const ExtendedFooter = () => {
         <Box style={{ width: "100%", mb: 2 }}>
           <FooterCaption />
         </Box>
-        <PoliciesLinks />
+        <PoliciesLinks showLogoutButton />
       </Stack>
     </Box>
   );
@@ -23,13 +24,15 @@ export const ExtendedFooter = () => {
 
 export const MinimizedFooter = () => {
   return (
-    <Box sx={{ width: "100%", pt: 10}}>
+    <Box sx={{ width: "100%", pt: 10 }}>
       <FooterCaption />
     </Box>
   );
 };
 
-export const PoliciesLinks = () => {
+export const PoliciesLinks = (showLogoutButton = false) => {
+  const { user, logout } = useAuth();
+
   return (
     <Typography
       variant={"caption"}
@@ -65,6 +68,15 @@ export const PoliciesLinks = () => {
       >
         ToS
       </a>
+      {showLogoutButton && user && (
+        <>
+          {" "}
+          -{" "}
+          <a onClick={logout} target={"_self"} rel="noreferrer" href="#">
+            Logout
+          </a>
+        </>
+      )}
     </Typography>
   );
 };

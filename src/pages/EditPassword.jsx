@@ -77,6 +77,10 @@ const EditPasswordPage = () => {
             type="password"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
+            inputProps={{
+              pattern: "^\\S+.*\\S+$",
+              minLength: 8,
+            }}
           />
 
           <LoadingButton

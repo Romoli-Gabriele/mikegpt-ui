@@ -13,6 +13,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import mike_legal from "../assets/mike_legal.jpg";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth.jsx";
+import { StartupService } from "../services/StartupService.jsx";
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -66,6 +67,9 @@ const RegisterPage = () => {
                 value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
                 autoFocus
+                inputProps={{
+                  minLength: 2,
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -78,6 +82,10 @@ const RegisterPage = () => {
                 value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
                 autoComplete="family-name"
+                inputProps={{
+                  // deve essere almeno 2 caratteri
+                  minLength: 2,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -90,6 +98,10 @@ const RegisterPage = () => {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
+                inputProps={{
+                  minLength: 2,
+                  pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -103,6 +115,10 @@ const RegisterPage = () => {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
+                inputProps={{
+                  pattern: "^\\S+.*\\S+$",
+                  minLength: 8,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
