@@ -11,6 +11,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import mike_legal from "../assets/mike_legal.jpg";
 import { useAuth } from "../hooks/useAuth.jsx";
 import { useState } from "react";
+import { StartupService } from "../services/StartupService.jsx";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -29,6 +30,7 @@ const LoginPage = () => {
     if (!res.success) {
       setError(res.error);
     } else {
+      StartupService.postAuthFlow(res.user);
       navigate("/");
     }
   };

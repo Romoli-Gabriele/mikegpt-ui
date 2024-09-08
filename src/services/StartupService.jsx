@@ -3,6 +3,7 @@ import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
 
 const postAuthFlow = async (user) => {
+  if (!user) return;
   // Richiede al server la lista delle workspace
   WorkspaceService.getWorkspacesDetails().then((workspaces) => {
     store.getActions().chat.setWorkspaces(workspaces);
