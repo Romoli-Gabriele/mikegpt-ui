@@ -22,6 +22,7 @@ import { ModalBox } from "./ModalBox";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
 import { store } from "../store";
+import { ConversationService } from "../services/ConversationService";
 
 const data = [];
 
@@ -44,16 +45,8 @@ export const ChatModal = ({
 
   const deleteChat = () => {
     // ELIMINA LA CHAT
-    // TODO: implementare
 
-    // RIMUOVI DALLO STORE
-    store
-      .getActions()
-      .chat.setConversations(
-        store
-          .getState()
-          .chat.conversations.filter((x) => x.conversationId !== conversationId)
-      );
+    ConversationService.deleteConversation(conversationId);
 
     // CHIUDI IL MODAL
     handleClose();

@@ -1,4 +1,5 @@
 import { store } from "../store";
+import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
 
 const postAuthFlow = async (user) => {
@@ -6,7 +7,13 @@ const postAuthFlow = async (user) => {
   WorkspaceService.getWorkspacesDetails().then((workspaces) => {
     store.getActions().chat.setWorkspaces(workspaces);
     store.getActions().chat.setWorkspaceLoaded(true);
+    // Verifica che l'utente sia in una workspace valida
     workspaceAndFoldersCheck(workspaces);
+
+    // Carica la lista delle conversazioni
+    ConversationService.fetchAndloadConversations().then(() => {
+      console.log("Loaded conversations");
+    });
   });
 };
 

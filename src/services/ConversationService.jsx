@@ -61,10 +61,35 @@ const sendMessage = async (
 };
 
 const sendFeedback = async (runid, feedback) => {
-  return await apiClient.post(`/give_feedback`, {
-    runid: runid,
-    feedback: feedback,
-  });
+  // Aggiorna lo store
+  const updatedMessages = [...(store.getState().chat.messages || [])].map(
+    (x) => {
+      if (x.data.runid === runid) {
+        console.log("Feedback u", x);
+        x.feedback = feedback;
+      }
+      return x;
+    }
+  );
+  store.getActions().chat.setMessages(updatedMessages);
+
+  // Invia il feedback al server
+  try {
+    const res = await apiClient.post(`/give_feedback`, {
+      runid: runid,
+      feedback: feedback,
+    });
+
+    if (res.status !== 200) {
+      console.error("Failed to send feedback");
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("sendFeedback", error);
+    return false;
+  }
 };
 
 const getFileUploadUrl = async (file_name) => {
@@ -113,19 +138,84 @@ const fetchAllConversations = async () => {
 
 const openConversation = async (conversationId) => {
   try {
+    console.log("loading conversation", conversationId);
     store.getActions().chat.setConversationId(conversationId);
     store.getActions().chat.setLoading(true);
     store.getActions().chat.setMessages([]);
-    const conversation = await getConversation(conversationId);
-    if (!conversation) {
+    const res = await apiClient.get(`/list_chats?session_id=${conversationId}`);
+    if (!res || !res.data) {
       store.getActions().chat.setLoading(false);
       return;
     }
-    store.getActions().chat.setMessages(conversation.messages);
+    const messages = res.data.data?.map(formatMessage) || [];
+    console.log("fetched conversation", messages);
+    store.getActions().chat.setMessages(messages);
   } catch (error) {
     console.error(error);
   } finally {
     store.getActions().chat.setLoading(false);
+  }
+};
+
+const formatMessage = (message) => {
+  return {
+    data: {
+      content: message.message,
+      documents: message.docs,
+      runid: message.runid,
+    },
+    type: message.type,
+  };
+};
+
+const fetchChatSessions = async (folderId = -1) => {
+  try {
+    // Prendiamo le sessioni degli ultimi 30 giorni
+    let startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    // format date string to YYY-MM-DD
+    startDate = startDate.toISOString().split("T")[0];
+
+    const res = await apiClient.get(
+      "/list_chat_sessions?folder_id=" + folderId + "&start_date=" + startDate
+    );
+    if (!res?.data?.data) throw new Error("Failed to fetch conversations");
+    return res.data.data;
+  } catch (error) {
+    console.error("fetchAllConversations", error);
+    return [];
+  }
+};
+
+const fetchAndloadConversations = async () => {
+  let data = [];
+  // Preleva le sessioni
+  const x = await fetchChatSessions(-1);
+  data = data.concat(x);
+
+  store.getActions().chat.setConversations(data);
+};
+
+const deleteConversation = async (conversationId) => {
+  console.log("deleteConversation", conversationId);
+  try {
+    const res = await apiClient.post(`/delete_chat_session`, {
+      chatSessionId: conversationId,
+    });
+
+    if (res.status !== 200) return false;
+
+    // Rimuove la conversazione dallo store
+    store
+      .getActions()
+      .chat.setConversations(
+        store
+          .getState()
+          .chat.conversations.filter((x) => x.id !== conversationId)
+      );
+  } catch (error) {
+    console.error("deleteConversation", error);
+    return false;
   }
 };
 
@@ -139,4 +229,6 @@ export const ConversationService = {
   openNewConversation,
   fetchConversationById,
   openConversation,
+  fetchAndloadConversations,
+  deleteConversation,
 };

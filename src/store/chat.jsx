@@ -21,49 +21,7 @@ export const chatModel = {
     state.loading = payload;
   }),
 
-  conversations: [
-    {
-      conversationId: "1",
-      title: "Fake uno",
-      date: new Date(),
-    },
-    {
-      conversationId: "2",
-      title: "Fake due",
-      date: (function () {
-        const d = new Date();
-        d.setDate(new Date().getDate() - 1);
-        return d;
-      })(),
-    },
-    {
-      conversationId: "3",
-      title: "Fake 3",
-      date: (function () {
-        const d = new Date();
-        d.setDate(new Date().getDate() - 3);
-        return d;
-      })(),
-    },
-    {
-      conversationId: "4",
-      title: "Fake 4",
-      date: (function () {
-        const d = new Date();
-        d.setDate(new Date().getDate() - 10);
-        return d;
-      })(),
-    },
-    ...new Array(100).fill(null).map((_, i) => ({
-      conversationId: `${i + 5}`,
-      title: `Fake ${i + 5}`,
-      date: (function () {
-        const d = new Date();
-        d.setDate(new Date().getDate() - i - 5);
-        return d;
-      })(),
-    })),
-  ],
+  conversations: [],
   setConversations: action((state, payload) => {
     state.conversations = payload;
   }),

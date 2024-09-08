@@ -31,11 +31,11 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
           },
         }}
         onClick={() => {
-          ConversationService.openConversation(chat.conversationId);
+          ConversationService.openConversation(chat.id);
         }}
       >
         <ListItemText
-          primary={chat.title || "Untitled chat"}
+          primary={chat.name || "Untitled chat"}
           primaryTypographyProps={styles.itemLabelTypographyProps}
         />
         <ListItemSecondaryAction>
@@ -61,7 +61,7 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
         open={isModalOpen}
         setOpen={setIsModalOpen}
         title={chat.title}
-        conversationId={chat.conversationId}
+        conversationId={chat.id}
       />
     </Box>
   );

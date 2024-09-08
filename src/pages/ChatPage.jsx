@@ -114,7 +114,7 @@ const ChatPage = () => {
         type: "human",
       };
 
-      let _messages = [...messages, sentMessage];
+      let _messages = [...(messages || []), sentMessage];
       setMessages([
         ..._messages,
         {
@@ -301,17 +301,6 @@ const ChatPage = () => {
                         enqueueSnackbar("Feedback submitted", {
                           variant: "success",
                         });
-                        setMessages((_messages) =>
-                          _messages.map((m, i) => {
-                            if (i === index) {
-                              return {
-                                ...m,
-                                feedback: 1,
-                              };
-                            }
-                            return m;
-                          })
-                        );
                       }}
                     >
                       <ThumbUpRounded />
@@ -328,17 +317,6 @@ const ChatPage = () => {
                         enqueueSnackbar("Feedback submitted", {
                           variant: "success",
                         });
-                        setMessages((_messages) =>
-                          _messages.map((m, i) => {
-                            if (i === index) {
-                              return {
-                                ...m,
-                                feedback: -1,
-                              };
-                            }
-                            return m;
-                          })
-                        );
                       }}
                     >
                       <ThumbDownRounded />

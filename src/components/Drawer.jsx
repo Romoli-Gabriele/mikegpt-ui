@@ -166,11 +166,7 @@ export default function MiniDrawer() {
   }, [workspaces, currentWorkspaceId]);
 
   const chats = React.useMemo(() => {
-    let filteredConversations = [...conversations].filter(
-      (conversation) =>
-        // Elimina le conversazioni piu vecchie di 30 giorni
-        new Date().getDate() - conversation.date.getDate() <= 30
-    );
+    let filteredConversations = [...conversations];
 
     if (searchTerm && searchTerm.length >= 3) {
       // usa una espressione regolare per cercare il termine di ricerca parziale e case insensitive
@@ -183,11 +179,13 @@ export default function MiniDrawer() {
     return {
       today:
         filteredConversations?.filter(
-          (conversation) => new Date().getDate() === conversation.date.getDate()
+          (conversation) =>
+            new Date().getDate() === conversation.date?.getDate()
         ) || [],
       last30Days:
         filteredConversations?.filter(
-          (conversation) => new Date().getDate() !== conversation.date.getDate()
+          (conversation) =>
+            new Date().getDate() !== conversation.date?.getDate()
         ) || [],
     };
   }, [conversations, searchTerm]);
