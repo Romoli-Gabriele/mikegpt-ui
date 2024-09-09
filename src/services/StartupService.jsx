@@ -12,6 +12,7 @@ const postAuthFlow = async (user) => {
   try {
     // Richiede al server la lista delle workspace
     const workspaces = await WorkspaceService.loadWorkspaces();
+    console.log("Loaded workspaces", workspaces); // TODO: Remove
     // Verifica che l'utente sia in una workspace valida
     const { currentWorkspaceId } = await loadAndCheckCurrentWorkspace(
       workspaces
