@@ -1,6 +1,7 @@
 import { store } from "../store";
 import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
+import {router} from "../App.jsx";
 
 /**
  * Funzione di inizializzazione post-autenticazione
@@ -12,7 +13,6 @@ const postAuthFlow = async (user) => {
   try {
     // Richiede al server la lista delle workspace
     const workspaces = await WorkspaceService.loadWorkspaces();
-    console.log("Loaded workspaces", workspaces); // TODO: Remove
     // Verifica che l'utente sia in una workspace valida
     const { currentWorkspaceId } = await loadAndCheckCurrentWorkspace(
       workspaces
@@ -24,6 +24,13 @@ const postAuthFlow = async (user) => {
   } catch (error) {
     console.error("Error in postAuthFlow", error);
   }
+
+    // Controllo se l'utente ha un abbonamento attivo
+    console.log("Checking user subscription", user.subscriptionId);
+    if(!user.subscriptionId && router.location.pathname !== "/products") {
+        console.log("User has no subscription");
+        router.navigate("/products");
+    }
 };
 
 /**

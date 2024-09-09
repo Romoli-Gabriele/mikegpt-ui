@@ -35,12 +35,16 @@ export const createCheckoutSession = async (productId) => {
             },
         ],
         success_url: window.location.origin + '/',
+        //TODO aggiungere url al backend per salvare i dati dell'utente (subscriptionId) e poi fare redirect alla home
         cancel_url: window.location.origin + '/products',
     });
 
     window.open(session.url, "_self");
+
 }
 
 export const unsubscribeStripe = async (subscriptionId) => {
     return await stripe.subscriptions.cancel(subscriptionId);
 }
+
+
