@@ -40,7 +40,8 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
           primary={chat.name || "Untitled chat"}
           primaryTypographyProps={{
             ...styles.itemLabelTypographyProps,
-            style: { whiteSpace: "normal" }, // overflow fix
+            // overflow fix
+            noWrap: true,
           }}
         />
         <ListItemSecondaryAction>

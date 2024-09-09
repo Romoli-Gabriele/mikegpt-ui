@@ -103,6 +103,14 @@ const ChatPage = () => {
         current_conversation_id = await createConversation();
       }
 
+      console.log({
+        question,
+        kwargs,
+        toolId,
+        messageId,
+        current_conversation_id,
+      });
+
       const sentMessage = {
         data: {
           content: question,

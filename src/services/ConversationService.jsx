@@ -93,7 +93,7 @@ const sendMessage = async (
   try {
     const data = await apiClient.post(`/query`, {
       question: message,
-      //   kwargs: kwargs,
+      kwargs: kwargs,
       conversationid: conversationId,
       ...(debugAB ? { debugAB: debugAB } : {}),
     });
