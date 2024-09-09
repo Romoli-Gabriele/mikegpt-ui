@@ -17,8 +17,6 @@ export const SettingsModal = ({ open, setOpen }) => {
   const { user, logout } = useAuth();
   const unsubscribe = () => {
 
-    //TODO aggiungere subscriptionId a user
-    //user.subscriptionId = "sub_1PwrQqJ7S8yxZLrWheVDgXh5"
     if(user.subscriptionId)
       unsubscribeStripe(user.subscriptionId).then(
         () => {

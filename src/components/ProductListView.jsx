@@ -37,7 +37,7 @@ const ProductListView = () => {
   const handleBuy = async (productId) => {
     await createCheckoutSession(productId);
     //TODO da levare quando implementiamo il backend
-    user.subscriptionId = ""
+    user.subscriptionId = "sub_1PwrQqJ7S8yxZLrWheVDgXh5"
   };
 
   return (
