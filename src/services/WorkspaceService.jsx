@@ -99,24 +99,48 @@ const fetchWorkspacesDetails = async () => {
   }
 };
 
+/**
+ * Formatta una cartella restituita dal server per renderla
+ * compatibile con il formato salvato nello store
+ * @param {*} folder
+ * @returns
+ */
+const formatFolder = (f) => {
+  return {
+    id: f.id,
+    name: f.name,
+    created_at: f.created_at,
+    chatSessions: [], // Vengono caricate in seguito
+  };
+};
+
+/**
+ * Formatta una workspace restituita dal sever per renderla
+ * compatibile con il formato salavto nello store
+ * @param {*} workspace
+ */
+const formatWorkspace = (workspace) => {
+  return {
+    ...workspace,
+    folders: workspace.folders.map(formatFolder),
+    chatSessions:
+      workspace.chatSessions?.map((session) => ({
+        ...session,
+        // aggiunge il folder_id di default
+        folderId: -1,
+      })) || [],
+  };
+};
+
+/**
+ * Carica le workspace dal server e le salva nello store formattandole correttamente
+ * Non salve le sessioni di chat, che verranno caricate in seguito
+ * @returns
+ */
 const loadWorkspaces = async () => {
   const _workspaces = await fetchWorkspacesDetails();
   // Formatta le workspace
-  const workspaces = _workspaces.map((w) => ({
-    ...w,
-    folders: w.folders.map((f) => ({
-      id: f.id,
-      name: f.name,
-      created_at: f.created_at,
-      chatSessions: [], // Vengono caricate in seguito
-    })),
-    chatSessions:
-      w.chatSessions?.map((session) => ({
-        ...session,
-        // aggiunge il folder_id
-        folderId: -1,
-      })) || [],
-  }));
+  const workspaces = _workspaces.map(formatWorkspace);
 
   const actions = store.getActions();
   actions.chat.setWorkspaces(workspaces);
@@ -240,9 +264,55 @@ const checkAndGetCurrentFolderId = () => {
   } else return currentFolderId || -1;
 };
 
+const fetchFoldersAPI = async (workspaceId) => {
+  try {
+    const res = await apiClient.get(`/list_folders`, { workspaceId });
+    return res?.data?.data || [];
+  } catch (error) {
+    console.error("list_folders", error);
+    return [];
+  }
+};
+
+/**
+ * Crea una nuova cartella in una workspace
+ * @param {*} workspaceId
+ * @param {*} name
+ * @returns L'id della nuova cartella
+ */
+const createFolder = async (workspaceId, name) => {
+  // CREATE FOLDER
+  const formattedName = name.trim();
+  const res = await createFolderAPI(workspaceId, formattedName);
+
+  if (!res) throw new Error("Error creating folder");
+
+  const foldersRes = await fetchFoldersAPI(workspaceId);
+  if (!foldersRes || !Array.isArray(foldersRes))
+    throw new Error("Error fetching folders");
+
+  // Cerca la nuova cartella appena creata
+  // potrebbero essreci più cartelle con lo stesso nome
+  // quindi cerca quella con la data di creazione più recente
+  const newFolder = foldersRes
+    .filter((x) => x.name === formattedName)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+  if (!newFolder) throw new Error("New created Folder not returned");
+
+  const folder = formatFolder(newFolder);
+
+  store.getActions().chat.addFolder({
+    workspaceId,
+    folder,
+  });
+
+  return newFolder.id;
+};
+
 export const WorkspaceService = {
   createWorkspace,
-  createFolder: createFolderAPI,
+  createFolder,
   renameWorkspace,
   renameFolder,
   fetchWorkspacesDetails,

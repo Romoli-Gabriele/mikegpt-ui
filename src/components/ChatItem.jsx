@@ -4,6 +4,7 @@ import {
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
+  Stack,
 } from "@mui/material";
 import { ConversationService } from "../services/ConversationService";
 import { MoreHorizOutlined } from "@mui/icons-material";
@@ -18,9 +19,10 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
   const theme = useTheme();
 
   return (
-    <Box sx={{ mr: drawerItemMarginPx * 2 + "px" }}>
+    <Stack sx={{ mr: drawerItemMarginPx * 2 + "px" }}>
       <ListItem
         sx={{
+          flexGrow: 1,
           ...styles.listItemButton,
           backgroundColor: isSelected
             ? "var(--background-highlight-color)"
@@ -36,7 +38,10 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
       >
         <ListItemText
           primary={chat.name || "Untitled chat"}
-          primaryTypographyProps={styles.itemLabelTypographyProps}
+          primaryTypographyProps={{
+            ...styles.itemLabelTypographyProps,
+            style: { whiteSpace: "normal" }, // overflow fix
+          }}
         />
         <ListItemSecondaryAction>
           <IconButton
@@ -58,6 +63,6 @@ export const ChatItem = ({ chat, currentConversationId, styles }) => {
       </ListItem>
 
       <ChatModal open={isModalOpen} setOpen={setIsModalOpen} chat={chat} />
-    </Box>
+    </Stack>
   );
 };

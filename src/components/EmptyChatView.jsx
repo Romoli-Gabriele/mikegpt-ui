@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Stack, Typography, Grid, Paper } from "@mui/material";
-import mike_logo from "../assets/mike_logo.png";
 import { useAuth } from "../hooks/useAuth";
 import styled from "@emotion/styled";
 import ElectricBolt from "@mui/icons-material/Bolt";
@@ -82,7 +81,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
       direction={"column"}
       justifyContent={"space-around"}
       spacing={1}
-      sx={{ width: "100%", maxHeight: "100%",  overflowY: "auto", padding: 0 }}
+      sx={{ width: "100%", maxHeight: "100%", overflowY: "auto", padding: 0 }}
     >
       <div>
         <NoMarginTypography variant={"h5"} fontWeight="bold">
@@ -100,7 +99,7 @@ export const EmptyChatView = ({ onToolPress = (tool) => {} }) => {
           direction={"row"}
           alignItems={"center"}
           spacing={1}
-          sx={{ width: "100%", marginBottom: "1rem" }}
+          sx={{ width: "100%", mb: 2, mt: 6 }}
         >
           <ElectricBolt style={{ color: "var(--support-text-color)" }} />
           <NoMarginTypography

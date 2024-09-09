@@ -164,8 +164,18 @@ export default function MiniDrawer() {
     const currentWorkspace = workspaces?.find(
       (workspace) => String(workspace.id) === String(currentWorkspaceId)
     );
-    return currentWorkspace?.folders || [];
-  }, [workspaces, currentWorkspaceId]);
+    const folders = currentWorkspace?.folders || [];
+    // Mette prima la cartella selezionata
+    const selectedFolder = folders.find(
+      (folder) => String(folder.id) === String(currentFolderId)
+    );
+    return [
+      selectedFolder,
+      ...folders.filter(
+        (folder) => String(folder.id) !== String(currentFolderId)
+      ),
+    ].filter((x) => !!x);
+  }, [workspaces, currentWorkspaceId, currentFolderId]);
 
   const shownChats = React.useMemo(() => {
     let merged = [];
@@ -250,7 +260,7 @@ export default function MiniDrawer() {
     return (
       <ChatItem
         chat={chat}
-        key={chat.id + "chat"}
+        key={"chat=" + chat.id + ",folder=" + chat.folderId || -1}
         currentConversationId={currentConversationId}
         styles={styles}
       />
@@ -343,7 +353,7 @@ export default function MiniDrawer() {
             borderRight: DRAWER_RIGHT_BORDER,
           }}
         >
-          <Box sx={{ overflowY: "auto", overflowX: open ? "auto" : "hidden" }}>
+          <Box sx={{ overflowY: "auto", overflowX: "hidden" }}>
             <List>
               <ListItem disablePadding={true} sx={{ display: "block" }}>
                 <Box

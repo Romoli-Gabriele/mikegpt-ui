@@ -26,6 +26,7 @@ import { store } from "../store";
 import { ConversationService } from "../services/ConversationService";
 import { useSnackbar } from "notistack";
 import { useStoreState } from "easy-peasy";
+import { WorkspaceService } from "../services/WorkspaceService";
 
 export const ChatModal = ({ open, setOpen, chat }) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -65,7 +66,7 @@ export const ChatModal = ({ open, setOpen, chat }) => {
       );
       if (folder) setFolder(folder);
     }
-  }, [chat]);
+  }, [chat, workspaces, currentWorkspaceId]);
 
   const renameChat = async () => {
     let newName = prompt("Enter the new chat name", chatTitle);
@@ -98,18 +99,26 @@ export const ChatModal = ({ open, setOpen, chat }) => {
     }
   };
 
-  const createFolder = () => {
-    // CREA LA CARTELLA
-    // TODO: implementare
-    // AGGIUNGI LA CHAT ALLA CARTELLA
-    addToFolder("folderId");
+  const createFolder = async () => {
+    try {
+      // CREA LA CARTELLA
+      const id = await WorkspaceService.createFolder(
+        currentWorkspaceId,
+        folderName
+      );
+      if (!id) throw new Error("Error creating folder");
+      // AGGIUNGI LA CHAT ALLA CARTELLA
+      addToFolder(id);
+    } catch (e) {
+      enqueueSnackbar("An error occurred", { variant: "error" });
+    }
   };
 
   const addToFolder = (newFolderId) => {
     // AGGIUNGI LA CHAT ALLA CARTELLA
     ConversationService.addConversationToFolder(
       conversationId,
-      store.getState().chat.currentWorkspaceId,
+      currentWorkspaceId,
       typeof chat.folderId === "number" ? chat.folderId : -1,
       newFolderId
     );

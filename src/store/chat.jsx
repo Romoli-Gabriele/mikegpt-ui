@@ -216,43 +216,56 @@ export const chatModel = {
 
   moveConversationToFolder: thunk(
     (actions, { conversationId, workspaceId, folderId, newFolderId }) => {
-      console.log("moveConversationToFolder", {
-        conversationId,
-        workspaceId,
-        folderId,
-        newFolderId,
-      });
-
       // Prima trova la conversazione
       const foundCounversation = actions.getConversation({
         conversationId,
         workspaceId,
         folderId,
       });
-
       if (!foundCounversation) return;
-
-      console.log("moveConversationToFolder", {
-        foundCounversation,
-      });
-
       // Elimina la conversazione dalla vecchia cartella
       actions.removeConversation({
         conversationId,
         workspaceId,
         folderId,
       });
-
-      console.log("moveConversationToFolder", "removeConversation");
-
       // Aggiunge la conversazione alla nuova cartella
       actions.addConversation({
         workspaceId,
         folderId: newFolderId,
         conversation: foundCounversation,
       });
-
-      console.log("moveConversationToFolder", "addConversation");
+      // Modifica la conversazione per aggiornare il folderId
+      actions.modifyConversation({
+        conversationId,
+        workspaceId,
+        folderId: newFolderId,
+        edits: { folderId: newFolderId },
+      });
     }
   ),
+
+  removeFolder: action((state, { workspaceId, folderId }) => {
+    state.workspaces = state.workspaces.map((workspace) => {
+      if (String(workspace.id) === String(workspaceId)) {
+        return {
+          ...workspace,
+          folders: workspace.folders.filter(
+            (x) => String(x.id) !== String(folderId)
+          ),
+        };
+      } else return workspace;
+    });
+  }),
+
+  addFolder: action((state, { workspaceId, folder }) => {
+    state.workspaces = state.workspaces.map((workspace) => {
+      if (String(workspace.id) === String(workspaceId)) {
+        return {
+          ...workspace,
+          folders: [...workspace.folders, folder],
+        };
+      } else return workspace;
+    });
+  }),
 };
