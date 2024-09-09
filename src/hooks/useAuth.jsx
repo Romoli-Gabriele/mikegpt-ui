@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { lambdaClient, apiClient } from "../services/ApiService.jsx";
 import AuthService from "../services/AuthService.jsx";
 import { store } from "../store/index.jsx";
+import { clearStore } from "../store/utils.jsx";
 
 export const AuthContext = createContext({});
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children, userData }) => {
   // call this function when you want to authenticate the user
   const login = async (username, password) => {
     try {
+      clearStore();
       const _user = await signIn({ username, password });
       const _session = await fetchAuthSession();
 
@@ -42,6 +44,7 @@ export const AuthProvider = ({ children, userData }) => {
           ..._user,
           ...attributes,
         };
+
         setUser(userData);
         return {
           success: true,
@@ -80,10 +83,7 @@ export const AuthProvider = ({ children, userData }) => {
     }
     setUser(null);
     navigate("/", { replace: true });
-
-    // Svuota lo store
-    store.persist.clear();
-    store.persist.flush();
+    clearStore();
   };
 
   const forgotPassword = async (username) => {
@@ -160,6 +160,7 @@ export const AuthProvider = ({ children, userData }) => {
 
       if (isSignUpComplete) {
         await autoSignIn();
+        clearStore();
 
         const _session = await fetchAuthSession();
 

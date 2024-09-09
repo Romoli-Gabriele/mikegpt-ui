@@ -4,6 +4,11 @@ import { lambdaClient, apiClient } from "./ApiService.jsx";
 import { tryToConvertToArrayHelper } from "./utils.jsx";
 import { WorkspaceService } from "./WorkspaceService.jsx";
 
+/**
+ * Crea una nuova conversazione, una nuova session chat e l'aggiunge alla lista delle conversazioni
+ * della workspace corrente nello store
+ * @returns
+ */
 const createConversation = async () => {
   // Preleva l'ID del workspace corrente
   const workspaceId = store.getState().chat.currentWorkspaceId;
@@ -50,10 +55,18 @@ const createConversation = async () => {
   return conversationId;
 };
 
+/**
+ * Richiede al server lambda i dettagli di una conversazione
+ * @param {*} conversationId
+ * @returns
+ */
 const getConversation = async (conversationId) => {
   return await lambdaClient.get(`/conversation/${conversationId}`);
 };
 
+/**
+ * Verifica la connessione con il server
+ */
 const queryHealth = async () => {
   try {
     const x = await apiClient.get(`/health`);
@@ -62,8 +75,15 @@ const queryHealth = async () => {
     console.error("queryHealth", error);
   }
 };
-queryHealth();
 
+/**
+ * Invia un messaggio al server e attende la sua risposta
+ * @param {*} conversationId
+ * @param {*} message
+ * @param {*} kwargs
+ * @param {*} debugAB
+ * @returns
+ */
 const sendMessage = async (
   conversationId,
   message,
@@ -83,6 +103,12 @@ const sendMessage = async (
   }
 };
 
+/**
+ * Invia al server un feedback per una conversazione e aggiorna lo store
+ * @param {*} runid
+ * @param {*} feedback
+ * @returns
+ */
 const sendFeedback = async (runid, feedback) => {
   // Aggiorna lo store
   const updatedMessages = [...(store.getState().chat.messages || [])].map(
@@ -129,19 +155,21 @@ const processFile = async (file_name, file_title, file_date) => {
   });
 };
 
+/**
+ * Apre una nuova conversazione, aggiorna lo store e resetta i messaggi
+ */
 const openNewConversation = () => {
   store.getActions().chat.setMessages([]);
   store.getActions().chat.setConversationId(null);
   store.getActions().chat.setLoading(false); // potrebbe essere in corso un caricamentonella vecchia conversazione
 };
 
-const fetchConversationById = async (conversationId) => {
-  return {
-    conversationId: conversationId,
-    messages: [],
-  };
-};
-
+/**
+ * Apre una nuova conversazione
+ * Richiede al server i messaggi della conversazione e li carica nello store
+ * @param {*} conversationId
+ * @returns
+ */
 const openConversation = async (conversationId) => {
   try {
     if (store.getState().chat.conversationId === conversationId) return;
@@ -172,6 +200,11 @@ const openConversation = async (conversationId) => {
   }
 };
 
+/**
+ * Formatta un messaggio ricevuto dal server nel formato atteso dallo store
+ * @param {*} message
+ * @returns
+ */
 const formatMessage = (message) => {
   return {
     data: {
@@ -184,6 +217,11 @@ const formatMessage = (message) => {
   };
 };
 
+/**
+ * Richiede al server la lista delle sessioni di chat di una cartella
+ * @param {*} folderId
+ * @returns
+ */
 const fetchChatSessions = async (folderId = -1) => {
   try {
     // Prendiamo le sessioni degli ultimi 30 giorni
@@ -204,7 +242,7 @@ const fetchChatSessions = async (folderId = -1) => {
 };
 
 /**
- *  Richiede al server e carica nello store tutte le conversazioni
+ * Richiede al server e carica nello store tutte le conversazioni
  * delle cartelle della workspace specifica
  * (le conversazioni fuori dalle cartelle sono già state restituite
  * nella workspace stessa)
@@ -254,6 +292,11 @@ const fetchAndLoadWorkspaceConversations = async (workspaceId) => {
   store.getActions().chat.setWorkspaces(updatedWorkspaces);
 };
 
+/**
+ * Elimina una conversazione e la rimuove dallo store
+ * @param {*} conversationId
+ * @returns
+ */
 const deleteConversation = async (conversationId) => {
   try {
     const res = await apiClient.post(`/delete_chat_session`, {
@@ -268,12 +311,24 @@ const deleteConversation = async (conversationId) => {
       workspaceId: store.getState().chat.currentWorkspaceId,
       folderId: WorkspaceService.checkAndGetCurrentFolderId(),
     });
+    // Se la conversazione eliminata è quella attualmente aperta, la chiude
+    if (store.getState().chat.conversationId === conversationId) {
+      openNewConversation();
+    }
   } catch (error) {
     console.error("deleteConversation", error);
     return false;
   }
 };
 
+/**
+ * Rinomina una conversazione
+ * @param {*} conversationId
+ * @param {*} newName
+ * @param {*} workspaceId
+ * @param {*} folderId
+ * @returns
+ */
 const renameConversation = async (
   conversationId,
   newName,
@@ -286,7 +341,6 @@ const renameConversation = async (
       chatSessionId: conversationId,
       name: newName,
     });
-    console.log("renameConversation", res.data);
 
     // Aggiorna lo store
     store.getActions().chat.modifyConversation({
@@ -301,6 +355,14 @@ const renameConversation = async (
   }
 };
 
+/**
+ * Aggiunge o rimuove una conversazione da una cartella
+ * @param {*} conversationId
+ * @param {*} workspaceId
+ * @param {*} folderId
+ * @param {*} newFolderId
+ * @returns
+ */
 const addConversationToFolder = async (
   conversationId,
   workspaceId,
@@ -343,9 +405,9 @@ export const ConversationService = {
   getFileUploadUrl,
   processFile,
   openNewConversation,
-  fetchConversationById,
   openConversation,
   fetchAndLoadWorkspaceConversations,
   deleteConversation,
   renameConversation,
+  queryHealth,
 };

@@ -1,6 +1,11 @@
 import { store } from "../store/index.jsx";
 import { apiClient } from "./ApiService.jsx";
 
+/**
+ * API Per creare una nuova workspace
+ * @param {*} name
+ * @returns
+ */
 const createWorkspaceAPI = async (name = "Unnamed workspace") => {
   try {
     const res = await apiClient.post(`/create_workspace`, { name });
@@ -11,6 +16,12 @@ const createWorkspaceAPI = async (name = "Unnamed workspace") => {
   }
 };
 
+/**
+ * API Per creare una nuova cartella in una workspace
+ * @param {*} workspaceId
+ * @param {*} name
+ * @returns
+ */
 const createFolderAPI = async (workspaceId, name = "Unnamed folder") => {
   try {
     const res = await apiClient.post(`/create_folder`, { name, workspaceId });
@@ -21,6 +32,12 @@ const createFolderAPI = async (workspaceId, name = "Unnamed folder") => {
   }
 };
 
+/**
+ * API per rinominare una cartella
+ * @param {*} folderId
+ * @param {*} name
+ * @returns
+ */
 export const renameFolderAPI = async (folderId, name) => {
   try {
     const res = await apiClient.post(`/rename_folder`, { name, folderId });
@@ -31,6 +48,12 @@ export const renameFolderAPI = async (folderId, name) => {
   }
 };
 
+/**
+ * API per rinominare una workspace
+ * @param {*} workspaceId
+ * @param {*} name
+ * @returns
+ */
 export const renameWorkspaceAPI = async (workspaceId, name) => {
   try {
     const res = await apiClient.post(`/rename_workspace`, {
@@ -44,6 +67,12 @@ export const renameWorkspaceAPI = async (workspaceId, name) => {
   }
 };
 
+/**
+ * Rinomina una workspace e aggiorna lo store
+ * @param {*} workspaceId
+ * @param {*} name
+ * @returns La workspace corrente aggiornata
+ */
 const renameWorkspace = async (workspaceId, name) => {
   const res = await renameWorkspaceAPI(workspaceId, name);
 
@@ -56,15 +85,20 @@ const renameWorkspace = async (workspaceId, name) => {
     (x) => String(x.id) === String(workspaceId)
   );
   updatedWorkspace = { ...updatedWorkspace, name };
-
   actions.chat.setWorkspaces([
     ...workspaces.filter((x) => String(x.id) !== String(workspaceId)),
     updatedWorkspace,
   ]);
-
   return updatedWorkspace;
 };
 
+/**
+ * Rinomina una cartella e aggiorna lo store
+ * @param {*} workspaceId
+ * @param {*} folderId
+ * @param {*} name
+ * @returns La workspace corrente aggiornata
+ */
 const renameFolder = async (workspaceId, folderId, name) => {
   const res = await renameFolderAPI(folderId, name);
 
@@ -80,15 +114,17 @@ const renameFolder = async (workspaceId, folderId, name) => {
     String(x.id) === String(folderId) ? { ...x, name } : x
   );
   updatedWorkspace = { ...updatedWorkspace, folders: updatedFolders };
-
   actions.chat.setWorkspaces([
     ...workspaces.filter((x) => String(x.id) !== String(workspaceId)),
     updatedWorkspace,
   ]);
-
   return updatedWorkspace;
 };
 
+/**
+ * Richiede al server la lista delle workspace con i dettagli sulle cartelle e le sessioni
+ * @returns
+ */
 const fetchWorkspacesDetails = async () => {
   try {
     const res = await apiClient.get(`/list_workspaces_with_details`);
@@ -149,6 +185,11 @@ const loadWorkspaces = async () => {
   return workspaces;
 };
 
+/**
+ * API per eliminare una workspace
+ * @param {*} workspaceId
+ * @returns
+ */
 const deleteWorkspaceAPI = async (workspaceId) => {
   try {
     const res = await apiClient.post(`/delete_workspace`, { workspaceId });
@@ -160,6 +201,11 @@ const deleteWorkspaceAPI = async (workspaceId) => {
   }
 };
 
+/**
+ * API per eliminare una cartella
+ * @param {*} folderId
+ * @returns
+ */
 const deleteFolderAPI = async (folderId) => {
   try {
     const res = await apiClient.post(`/delete_folder`, { folderId });
@@ -170,19 +216,23 @@ const deleteFolderAPI = async (folderId) => {
   }
 };
 
+/**
+ * Crea una nuova workspace e la aggiunge allo store
+ * @param {*} name
+ * @returns
+ */
 const createWorkspace = async (name = "Unnamed workspace") => {
   // CREATE WORKSPACE
   const formattedName = name.trim();
   const res = await createWorkspaceAPI(formattedName);
   if (!res) throw new Error("Error creating workspace");
 
-  // CARICA NUOVAMENTE LA LISTA WORKSPACES
+  // AGGIORNA LO STORE
+  const actions = store.getActions();
+  // preleva nuovamente i dati delle workspace dal server
   const newData = await WorkspaceService.fetchWorkspacesDetails();
 
-  const actions = store.getActions();
-
-  // PRELEVA LA WORKSPACE APPENA CREATA
-
+  // Preleva solo la workspace appena creata
   let newWorkspace;
   // Inizia a cercare dal fondo della lista (è più probabile che la workspace appena creata sia l'ultima) la workspace con lo stesso nome
   for (let i = newData.length - 1; i >= 0; i--) {
@@ -193,17 +243,30 @@ const createWorkspace = async (name = "Unnamed workspace") => {
   }
   if (!newWorkspace) throw new Error("New created Workspace not returned");
 
-  // AGGIORNA LO STORE CON LA NUOVA WORKSPACE
-  const newWorkspaces = [...store.getState().chat.workspaces, newWorkspace];
+  // Aggioorna lo store con la nuova workspace
+  // Mantiene quelle vecchie per non eliminare i dati popolati in precedenza
+  const newWorkspaces = [
+    ...store.getState().chat.workspaces,
+    formatWorkspace(newWorkspace),
+  ];
   actions.chat.setWorkspaces(newWorkspaces);
 
-  // IMPOSTA COME DEFAULT
-  actions.chat.setCurrentWorkspaceId(newWorkspace.id);
+  // IMPOSTA LA NUOVA WORKSPACE COME DEFAULT
+  actions.chat.saveCurrentWorkspaceId(newWorkspace.id);
 
   return newWorkspace;
 };
 
+/**
+ * Elimina un workspace e aggiorna lo store
+ * @param {*} workspaceId
+ */
 const deleteWorkspace = async (workspaceId) => {
+  // Se c'è solo 1 workspace non è possibile eliminarla
+  if (store.getState().chat.workspaces.length === 1) {
+    throw new Error("You can't delete the last workspace");
+  }
+
   // DELETE WORKSPACE
   const res = await deleteWorkspaceAPI(workspaceId);
   if (!res) throw new Error("Error deleting workspace");
@@ -211,7 +274,7 @@ const deleteWorkspace = async (workspaceId) => {
   const actions = store.getActions();
   const filteredWorkspaces = store
     .getState()
-    .chat.workspaces.filter((x) => x.id !== workspaceId);
+    .chat.workspaces.filter((x) => String(x.id) !== String(workspaceId));
   actions.chat.setWorkspaces(filteredWorkspaces);
 
   // SE LA WORKSPACE ERA QUELLA DI DEFAULT NE SELEZIONA UN'ALTRA A CASO
@@ -224,6 +287,12 @@ const deleteWorkspace = async (workspaceId) => {
   }
 };
 
+/**
+ * Elimina una cartella e aggiorna lo store
+ * @param {*} folderId
+ * @param {*} workspaceId
+ * @returns
+ */
 const deleteFolder = async (folderId, workspaceId) => {
   // DELETE FOLDER
   const res = await deleteFolderAPI(folderId);
@@ -236,6 +305,12 @@ const deleteFolder = async (folderId, workspaceId) => {
     ...workspaces.filter((x) => x.id !== workspaceId),
     updatedWorkspace,
   ]);
+
+  // AGGIORNA LA CARTELLA CORRENTE
+  const currentFolderId = store.getState().chat.currentFolderId;
+  if (String(currentFolderId) === String(folderId))
+    actions.chat.saveCurrentFolderId(null);
+
   return updatedWorkspace;
 };
 
@@ -264,6 +339,11 @@ const checkAndGetCurrentFolderId = () => {
   } else return currentFolderId || -1;
 };
 
+/**
+ * Preleva dal server la lista delle cartelle di una workspace
+ * @param {*} workspaceId
+ * @returns
+ */
 const fetchFoldersAPI = async (workspaceId) => {
   try {
     const res = await apiClient.get(`/list_folders`, { workspaceId });

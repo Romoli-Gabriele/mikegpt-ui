@@ -5,25 +5,35 @@ import { act } from "react";
 const CURRENT_WORKSPACE_STORAGE_KEY = "CURRENT_WORKSPACE_STORAGE";
 const CURRENT_FOLDER_STORAGE_KEY = "CURRENT_FOLDER_STORAGE";
 
-export const chatModel = {
+const initialState = {
   messages: [],
+  conversationId: null,
+  loading: false,
+  currentWorkspaceId: null,
+  currentFolderId: null,
+  selectedFolderId: null,
+  workspaces: [],
+  workspaceLoaded: false,
+};
+
+export const chatModel = {
+  ...initialState,
+
   addMessage: action((state, payload) => {
     state.messages.push(payload);
   }),
   setMessages: action((state, payload) => {
     state.messages = payload;
   }),
-  conversationId: null,
+
   setConversationId: action((state, payload) => {
     state.conversationId = payload;
   }),
 
-  loading: false,
   setLoading: action((state, payload) => {
     state.loading = payload;
   }),
 
-  currentWorkspaceId: null,
   setCurrentWorkspaceId: action((state, payload) => {
     state.currentWorkspaceId = payload;
     state.currentFolderId = null;
@@ -45,7 +55,6 @@ export const chatModel = {
     state.setCurrentWorkspaceId(payload);
   }),
 
-  currentFolderId: null,
   setCurrentFolderId: action((state, payload) => {
     state.currentFolderId = payload;
   }),
@@ -62,16 +71,14 @@ export const chatModel = {
     state.setCurrentFolderId(payload);
   }),
 
-  selectedFolderId: null,
   setSelectedFolderId: action((state, payload) => {
     state.selectedFolderId = payload;
   }),
 
-  workspaces: [],
   setWorkspaces: action((state, payload) => {
     state.workspaces = payload;
   }),
-  workspaceLoaded: false,
+
   setWorkspaceLoaded: action((state, payload) => {
     state.workspaceLoaded = payload;
   }),
@@ -268,4 +275,6 @@ export const chatModel = {
       } else return workspace;
     });
   }),
+
+  reset: action(() => ({ ...initialState })),
 };

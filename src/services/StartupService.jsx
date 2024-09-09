@@ -2,6 +2,11 @@ import { store } from "../store";
 import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
 
+/**
+ * Funzione di inizializzazione post-autenticazione
+ * @param {*} user
+ * @returns
+ */
 const postAuthFlow = async (user) => {
   if (!user) return;
   try {

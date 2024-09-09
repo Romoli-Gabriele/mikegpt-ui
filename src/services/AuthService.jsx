@@ -16,12 +16,10 @@ const getAuthenticatedUser = async () => {
     apiClient.defaults.headers.Authorization = `Bearer ${token}`;
     // Get additional user attributes if they exist
     const attributes = await fetchUserAttributes();
-    // const userData = await AuthService.getUserData();
 
     return {
       username,
       userId,
-      // data: userData.data.user,
       ...attributes,
     };
   } catch (error) {
