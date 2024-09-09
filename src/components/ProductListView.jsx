@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getProducts, createCheckoutSession, getPrices } from '../services/StripeService';
 import { Grid, Button, Typography, Stack } from '@mui/material';
+import {useAuth} from "../hooks/useAuth.jsx";
 
 const ProductListView = () => {
   const [products, setProducts] = useState([]);
@@ -31,8 +32,12 @@ const ProductListView = () => {
     }
   }, []);
 
+  const {user} = useAuth();
+
   const handleBuy = async (productId) => {
     await createCheckoutSession(productId);
+    //TODO da levare quando implementiamo il backend
+    user.subscriptionId = ""
   };
 
   return (

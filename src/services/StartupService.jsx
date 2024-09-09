@@ -1,6 +1,7 @@
 import { store } from "../store";
 import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
+import {router} from "../App.jsx";
 
 /**
  * Funzione di inizializzazione post-autenticazione
@@ -24,6 +25,13 @@ const postAuthFlow = async (user) => {
   } catch (error) {
     console.error("Error in postAuthFlow", error);
   }
+
+    // Controllo se l'utente ha un abbonamento attivo
+    console.log("Checking user subscription", user.subscriptionId);
+    if(!user.subscriptionId && router.location.pathname !== "/products") {
+        console.log("User has no subscription");
+        router.navigate("/products");
+    }
 };
 
 /**
