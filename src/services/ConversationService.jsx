@@ -92,7 +92,7 @@ const sendMessage = async (
   message,
   kwargs = {},
   functionName = "query",
-  modifyChatRunId = null,
+  modifyChatRunId,
   debugAB = null
 ) => {
   try {
@@ -101,7 +101,7 @@ const sendMessage = async (
       kwargs: kwargs,
       conversationid: conversationId,
       functionName: functionName,
-      //modifyChatRunId: "modifyChatRunId",
+      ...(modifyChatRunId ? { modifyChatRunId: modifyChatRunId } : {}),
       ...(debugAB ? { debugAB: debugAB } : {}),
     });
     return data.data;

@@ -276,5 +276,18 @@ export const chatModel = {
     });
   }),
 
+  removeMessagesAfter: action((state, payload) => {
+    // Rimuove tutti i messaggi inviati dopo il messaggio con il runId specificato
+    const index = state.messages.findIndex((x) => x?.data?.runid === payload);
+    if (index === -1) return;
+    const lastMessage = state.messages[index];
+    const lastDate = new Date(lastMessage?.created_at);
+    if (!lastDate || isNaN(lastDate.getTime())) return;
+    state.messages = state.messages.filter((x) => {
+      const date = new Date(x?.created_at);
+      if (x?.data?.runid === payload) return false;
+      return !date || isNaN(date.getTime()) || date <= lastDate;
+    });
+  }),
   reset: action(() => ({ ...initialState })),
 };

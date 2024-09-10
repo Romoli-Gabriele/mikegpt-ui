@@ -30,6 +30,7 @@ import dedent from "dedent";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { useMediaQuery } from "@mui/material";
 import TOOLS from "../services/TOOLS.json";
+import { store } from "../store/index.jsx";
 
 const CONTENT_PADDING = {
   paddingLeft: "3rem",
@@ -44,6 +45,9 @@ const ChatPage = () => {
   const conversationId = useStoreState((state) => state.chat.conversationId);
   const setConversationId = useStoreActions(
     (actions) => actions.chat.setConversationId
+  );
+  const removeMessagesAfter = useStoreActions(
+    (actions) => actions.chat.removeMessagesAfter
   );
   const loading = useStoreState((state) => state.chat.loading);
   const setLoading = useStoreActions((actions) => actions.chat.setLoading);
@@ -111,7 +115,14 @@ const ChatPage = () => {
         type: "human",
       };
 
-      let _messages = [...(messages || []), sentMessage];
+      // Se il messaggio inviato era una modifica, elimina tutti i messaggi dopo
+      if (!!messageId) {
+        console.log("Removing messages after", messageId);
+        removeMessagesAfter(messageId);
+      }
+
+      let _messages = [...(store.getState().chat.messages || []), sentMessage];
+
       setMessages([
         ..._messages,
         {
@@ -130,6 +141,8 @@ const ChatPage = () => {
           messageId,
           import.meta.env.VITE_DEBUG_SELECT === "true" ? debugAB : null
         );
+
+        console.log({ rsendMessage: res });
 
         if (!res.data) throw new Error("No data in response");
 
