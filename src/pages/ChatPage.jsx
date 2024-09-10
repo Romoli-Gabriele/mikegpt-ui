@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import ico from "../assets/mike_logo.png";
 import { ConversationService } from "../services/ConversationService.jsx";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   ThumbDownRounded,
   ThumbUpRounded,
@@ -29,6 +29,7 @@ import Markdown from "react-markdown";
 import dedent from "dedent";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { useMediaQuery } from "@mui/material";
+import TOOLS from "../services/TOOLS.json";
 
 const CONTENT_PADDING = {
   paddingLeft: "3rem",
@@ -62,10 +63,6 @@ const ChatPage = () => {
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const isMd = useMediaQuery(theme.breakpoints.down("md"));
 
-  // useEffect(() => {
-  //   ConversationService.sendMessage("", "").then();
-  // }, [conversationId]);
-
   const createConversation = async () => {
     setLoading(true);
     try {
@@ -94,6 +91,7 @@ const ChatPage = () => {
     question = "",
     kwargs = undefined,
     toolId = undefined,
+    functionName = undefined,
     messageId = undefined
   ) => {
     setLoading(true);
@@ -103,19 +101,12 @@ const ChatPage = () => {
         current_conversation_id = await createConversation();
       }
 
-      console.log({
-        question,
-        kwargs,
-        toolId,
-        messageId,
-        current_conversation_id,
-      });
-
       const sentMessage = {
         data: {
           content: question,
           kwargs: kwargs,
           toolId: toolId,
+          functionName: functionName,
         },
         type: "human",
       };
@@ -135,8 +126,12 @@ const ChatPage = () => {
           current_conversation_id,
           question,
           kwargs && Object.keys(kwargs).length > 0 ? kwargs : undefined,
+          functionName,
+          messageId,
           import.meta.env.VITE_DEBUG_SELECT === "true" ? debugAB : null
         );
+
+        if (!res.data) throw new Error("No data in response");
 
         // Controlla se l'utente è ancora nella chat che ha inviato il messaggio e questa non è cambiata
         // Se no c'è il bug che se invio un messaggio e subito dopo prima della risposta  cambio chat
@@ -209,7 +204,11 @@ const ChatPage = () => {
           <Stack
             direction={message.type === "ai" ? "row" : "row-reverse"}
             spacing={2}
-            key={index}
+            key={
+              message.runid && message.runid > -1
+                ? message.runid
+                : index + "DUMMY"
+            }
           >
             <Stack
               direction={"column"}
@@ -244,6 +243,20 @@ const ChatPage = () => {
                   boxShadow: message.type === "ai" ? "none" : theme.shadows[1],
                 }}
               >
+                {message.type !== "ai" &&
+                  message.data.functionName != undefined && (
+                    <Typography
+                      fontSize={"0.8rem"}
+                      fontWeight={"bold"}
+                      color={theme.palette.text.secondary}
+                    >
+                      {
+                        TOOLS.find(
+                          (x) => x.endpoint === message.data.functionName
+                        ).name
+                      }
+                    </Typography>
+                  )}
                 {message.data ? (
                   <Markdown>
                     {dedent(fromatMessage(message.data.content))}
@@ -254,6 +267,28 @@ const ChatPage = () => {
                     style={{ color: theme.palette.primary }}
                   />
                 )}
+
+                {message?.data?.kwargs &&
+                  Object.keys(message.data.kwargs).length > 0 && (
+                    <Typography fontWeight={"bold"}>
+                      {Object.entries(message.data.kwargs).map(
+                        ([key, value]) => (
+                          <Stack key={key} direction={"row"} spacing={1}>
+                            <Typography
+                              key={key}
+                              variant={"body2"}
+                              fontWeight={"bold"}
+                            >
+                              {key}
+                            </Typography>
+                            <Typography key={value} variant={"body2"}>
+                              {value}
+                            </Typography>
+                          </Stack>
+                        )
+                      )}
+                    </Typography>
+                  )}
 
                 {message.type !== "ai" && (
                   <Box>

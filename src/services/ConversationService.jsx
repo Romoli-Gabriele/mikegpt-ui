@@ -81,13 +81,18 @@ const queryHealth = async () => {
  * @param {*} conversationId
  * @param {*} message
  * @param {*} kwargs
+ * @param {*} functionName
+ * @param {*} modifyChatRunId
  * @param {*} debugAB
  * @returns
  */
+
 const sendMessage = async (
   conversationId,
   message,
   kwargs = {},
+  functionName = "query",
+  modifyChatRunId = null,
   debugAB = null
 ) => {
   try {
@@ -95,6 +100,8 @@ const sendMessage = async (
       question: message,
       kwargs: kwargs,
       conversationid: conversationId,
+      functionName: functionName,
+      //modifyChatRunId: "modifyChatRunId",
       ...(debugAB ? { debugAB: debugAB } : {}),
     });
     return data.data;
