@@ -105,7 +105,7 @@ const ChatPage = () => {
         current_conversation_id = await createConversation();
       }
 
-      const sentMessage = {
+      let sentMessage = {
         data: {
           content: question,
           kwargs: kwargs,
@@ -113,23 +113,42 @@ const ChatPage = () => {
           functionName: functionName,
         },
         type: "human",
+        created_at: new Date().toISOString(),
       };
+
+      let _messages = store.getState().chat.messages || [];
 
       // Se il messaggio inviato era una modifica, elimina tutti i messaggi dopo
       if (!!messageId) {
-        console.log("Removing messages after", messageId);
-        removeMessagesAfter(messageId);
+        const index = _messages.findIndex(
+          (x) => x?.data?.runid == messageId && x?.type === "human"
+        );
+        if (index === -1) {
+          console.error("Message to edit not found");
+        } else {
+          const lastMessage = _messages[index];
+          const lastDate = new Date(lastMessage?.created_at);
+          if (!lastDate || isNaN(lastDate.getTime())) {
+            console.error("Invalid date");
+          } else {
+            _messages = _messages.filter((x) => {
+              const date = new Date(x?.created_at);
+              if (x?.data?.runid === messageId) return false;
+              return !date || isNaN(date.getTime()) || date <= lastDate;
+            });
+          }
+        }
       }
-
-      let _messages = [...(store.getState().chat.messages || []), sentMessage];
 
       setMessages([
         ..._messages,
+        sentMessage,
         {
           data: null,
           type: "ai",
         },
       ]);
+
       setLoading(true);
 
       try {
@@ -142,9 +161,7 @@ const ChatPage = () => {
           import.meta.env.VITE_DEBUG_SELECT === "true" ? debugAB : null
         );
 
-        console.log({ rsendMessage: res });
-
-        if (!res.data) throw new Error("No data in response");
+        if (!res?.data) throw new Error("No data in response");
 
         // Controlla se l'utente è ancora nella chat che ha inviato il messaggio e questa non è cambiata
         // Se no c'è il bug che se invio un messaggio e subito dopo prima della risposta  cambio chat
@@ -153,6 +170,10 @@ const ChatPage = () => {
           String(current_conversation_id) === String(conversationId) ||
           !conversationId
         ) {
+          // Aggiunge il runid al messaggio inviato
+          sentMessage.data.runid = res.data["runid"];
+
+          // Messaggio di risposta
           const responseMessage = {
             data: {
               content: res.data["response"],
@@ -160,9 +181,11 @@ const ChatPage = () => {
               runid: res.data["runid"],
             },
             type: "ai",
+            created_at: new Date().toISOString(),
           };
 
-          setMessages([..._messages, responseMessage]);
+          // Aggiunge il messaggio di risposta
+          setMessages([..._messages, sentMessage, responseMessage]);
         }
       } catch (e) {
         // skip
@@ -171,9 +194,10 @@ const ChatPage = () => {
         console.error(e);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const renderContent = () => {
@@ -219,8 +243,8 @@ const ChatPage = () => {
             spacing={2}
             key={
               message.runid && message.runid > -1
-                ? message.runid
-                : index + "DUMMY"
+                ? message.type + ":" + message.runid
+                : "DUMMY" + "_" + index
             }
           >
             <Stack

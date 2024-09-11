@@ -109,7 +109,12 @@ export const InputBar = React.forwardRef(
       submit: submit,
       clear: clear,
       edit: (id, val, kwargs, toolId) => {
-        console.log("EDIT MESSAGE CALLED WITH PROPS:", id, val, kwargs, toolId);
+        console.log("EDIT MESSAGE CALLED WITH PROPS:", {
+          id,
+          val,
+          kwargs,
+          toolId,
+        });
         clear();
         setValue(val);
         setKwargs(kwargs);
