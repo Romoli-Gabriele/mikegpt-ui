@@ -81,22 +81,31 @@ const queryHealth = async () => {
  * @param {*} conversationId
  * @param {*} message
  * @param {*} kwargs
+ * @param {*} functionName
+ * @param {*} modifyChatRunId
  * @param {*} debugAB
  * @returns
  */
+
 const sendMessage = async (
   conversationId,
   message,
   kwargs = {},
+  functionName = "query",
+  modifyChatRunId,
   debugAB = null
 ) => {
   try {
-    const data = await apiClient.post(`/query`, {
+    const query = {
       question: message,
-      //   kwargs: kwargs,
+      kwargs: kwargs,
       conversationid: conversationId,
+      functionName: functionName,
+      ...(modifyChatRunId ? { modifyChatRunId: modifyChatRunId } : {}),
       ...(debugAB ? { debugAB: debugAB } : {}),
-    });
+    };
+
+    const data = await apiClient.post(`/query`, query);
     return data.data;
   } catch (error) {
     console.error("sendMessage", error);

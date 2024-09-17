@@ -506,11 +506,13 @@ export default function MiniDrawer() {
             )}
           </ListItem>
           {!open && (
-            <Stack>
-              <IconButton edge="end" onClick={handleSignOut}>
-                <LogoutOutlined color="primary" />
-              </IconButton>
-            </Stack>
+            <Box sx={{}}>
+              <Stack direction="row" justifyContent="center">
+                <IconButton onClick={handleSignOut}>
+                  <LogoutOutlined color="primary" />
+                </IconButton>
+              </Stack>
+            </Box>
           )}
         </Stack>
       </Drawer>

@@ -35,7 +35,10 @@ const PopupBody = styled("div")(({ theme }) => {
 
 export const InputBar = React.forwardRef(
   (
-    { onSubmit = (value, kwargs, toolId, messageId) => {}, loading = false },
+    {
+      onSubmit = (value, kwargs, toolId, functionName, messageId) => {},
+      loading = false,
+    },
     ref
   ) => {
     const theme = useTheme();
@@ -70,7 +73,8 @@ export const InputBar = React.forwardRef(
       onSubmit(
         value,
         kwargs,
-        selectedTool?.ID || undefined,
+        typeof selectedTool?.ID === "number" ? selectedTool?.ID : undefined,
+        selectedTool?.endpoint || undefined,
         messageId || undefined
       );
       clear();
@@ -105,7 +109,12 @@ export const InputBar = React.forwardRef(
       submit: submit,
       clear: clear,
       edit: (id, val, kwargs, toolId) => {
-        console.log("EDIT MESSAGE CALLED WITH PROPS:", id, val, kwargs, toolId);
+        console.log("EDIT MESSAGE CALLED WITH PROPS:", {
+          id,
+          val,
+          kwargs,
+          toolId,
+        });
         clear();
         setValue(val);
         setKwargs(kwargs);
