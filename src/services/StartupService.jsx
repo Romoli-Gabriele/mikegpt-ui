@@ -2,6 +2,7 @@ import { store } from "../store";
 import { ConversationService } from "./ConversationService";
 import { WorkspaceService } from "./WorkspaceService";
 import {router} from "../App.jsx";
+import {checkSubscriptionActive} from "./StripeService.jsx";
 
 /**
  * Funzione di inizializzazione post-autenticazione
@@ -30,6 +31,17 @@ const postAuthFlow = async (user) => {
     if(!user.subscriptionId && router.location.pathname !== "/products") {
         console.log("User has no subscription");
         router.navigate("/products");
+    }else{
+        console.log("User has a subscription");
+        checkSubscriptionActive(user.subscriptionId).then((active) => {
+            if(!active && router.location.pathname !== "/products") {
+                console.log("User subscription is not active");
+                router.navigate("/products");
+            }else if(active && router.location.pathname === "/products"){
+                console.log("User subscription is active");
+                router.navigate("/");
+            }
+        });
     }
 };
 

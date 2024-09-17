@@ -19,6 +19,11 @@ export const getPrices = async (productId) => {
     return prices.data[0];
 }
 
+export const checkSubscriptionActive = async (subscriptionId) => {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    return subscription.status === 'active';
+}
+
 
 export const createCheckoutSession = async (productId) => {
 
