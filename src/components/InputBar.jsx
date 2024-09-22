@@ -2,7 +2,6 @@ import React, { useImperativeHandle, useMemo, useState } from "react";
 import {
   Box,
   CircularProgress,
-  Divider,
   IconButton,
   InputBase,
   List,
@@ -232,7 +231,9 @@ export const InputBar = React.forwardRef(
                 >
                   <ElectricBolt
                     style={{
-                      color: "var(--support-text-color)",
+                      color: !!selectedTool
+                        ? theme.palette.primary.main
+                        : "var(--support-text-color)",
                     }}
                   />
                 </IconButton>
@@ -276,8 +277,9 @@ export const InputBar = React.forwardRef(
                   <IconButton
                     onClick={closeExtended}
                     sx={{
-                      p: "5px",
+                      // p: "5px",
                       color: "var(--generic-text-color)",
+                      aspectRatio: 1,
                     }}
                     aria-label="directions"
                   >
